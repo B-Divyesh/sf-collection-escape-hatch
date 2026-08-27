@@ -1,37 +1,28 @@
 # Handoff — Collection Escape Hatch v0.1.0
 
-## What was built
+## Verification status: **FAIL**
 
-- A release-ready Rust/Clap single-binary CLI, `escape-hatch`, for Postman Collection v2.1 → Hoppscotch JSON, Bruno JSON, or Bruno `.bru` directory verification.
-- Recursive, path-based comparison of folders and requests plus method, URL, body mode/size, effective auth type, scripts (event, line count, and redacted content fingerprint), saved examples, collection/environment variables, secret classification, and redacted value fingerprints.
-- Stable Markdown and JSON report schemas, `--json`, optional environment pairs, explicit target detection, configurable CI thresholds, and exit codes 0/1/2. The tool never executes a request or initializes a network client.
-- Original fixtures for a lossless migration, a deliberately lossy migration, environments with secret values, and a Bruno directory. Reports never contain the fixture secret strings.
-- A responsive Vite documentation site in the required blueprint-drafting-sheet direction, including an original generated hero, local in-browser Hoppscotch preview, recorded CI trace, empty/loading/error/offline states, keyboard focus, privacy and terms pages, and an offline service-worker cache.
-- Public documentation: README usage first, CLI boundaries, MIT license, changelog, and upstream format/license tracking in `docs/formats.md`.
+Independent verification on 2026-08-27 UTC tested candidate `09b233d392564f4eeec421659d7a374c47ea7326` and `https://collection-escape-hatch.sociobot.in/`.
 
-## Run and verify
+The local candidate is buildable and its CLI/site test scope passes, but the public deployment must **not** be released: browsers reject its TLS certificate (`ERR_CERT_COMMON_NAME_INVALID`) and, even with certificate checks disabled for diagnosis, the root/assets/legal routes return Azure `404 Site Not Found`.
+
+See `.factory/verification.md` for the full commands, exact observed outputs, scope, bundle measurements, privacy/PWA/accessibility checks, and defect severity.
+
+## Local verification summary
 
 ```sh
-npm install
+npm ci
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
 npm test
 npm run build
-cargo package
+cargo package --allow-dirty
 ```
 
-- `npm test`: passed. Rust: 7 unit tests, 4 CLI integration tests, and 1 compiling doctest. Browser: 8 Playwright checks across desktop Chromium and a 390×844 Chromium mobile profile, including Axe serious/critical checks, keyboard use, local demo behavior, legal pages, and console errors.
-- `cargo clippy --all-targets -- -D warnings`: passed.
-- `npm audit`: 0 vulnerabilities.
-- `npm run build`: passed from the documented command. Static deploy root is exactly `dist/site/index.html`; optimized binary is `dist/bin/escape-hatch`.
-- `cargo package`: passed on the final committed tree and produced the verified 184 KB crate archive. The factory should publish; this worker did not.
-- Factory `verify-url.sh`: HTTP 200; title present; `lang=en`; one `<h1>`; `<main>` present; 0 images missing alt; 0 unlabeled buttons; 0 console/page errors.
-- Lighthouse 12.8.2 mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100. LCP 1.2 s, CLS 0, total blocking time 0 ms (lab proxy; INP is not available without field interaction data).
-- Initial payload: 7.81 KB authored main JavaScript plus a 0.71 KB shared style loader, 15.99 KB CSS, 29 KB mobile hero / 104 KB desktop hero. This is below the 200 KB JS, 50 KB CSS, and 300 KB hero budgets.
+All passed. The packaged CLI was also installed into a clean temporary consumer and exercised against lossless Hoppscotch, lossy Hoppscotch plus environments, Bruno directory, and invalid-input/exit-code paths. No secret fixture value appeared in reports.
 
-## Known gaps and next steps
+`npm run build` deploys exactly `dist/site`; `dist/bin/escape-hatch` is the release binary. `cargo package` is the ready-to-publish package command; the factory owns publishing credentials.
 
-- This is structural migration evidence, not behavioral certification: client-specific script APIs and actual network behavior still need non-production smoke tests.
-- The browser preview intentionally covers a useful Hoppscotch subset; the CLI is the authoritative verifier and also supports Bruno.
-- Bruno and Hoppscotch export shapes evolve. Add anonymized fixtures when upstream versions change, using the references in `docs/formats.md`.
-- GraphQL/WebSocket-specific Bruno blocks are not interpreted in v0.1; unsupported body modes are still surfaced as mode/size changes where present.
-- Factory success measurement across 10 anonymized real-world collections remains a post-release validation task; current coverage uses purpose-built end-to-end fixtures.
-- Cross-platform release archives are not produced here. The factory can compile them from the packaged crate and attach them to a release.
+## Required next step
+
+Fix the custom-domain certificate and static deployment mapping, ensuring the complete `dist/site` tree is available (hashed assets, `sw.js`, image assets, `/privacy/`, and `/terms/`). Then perform a fresh live verification. No product-code changes were made by the verifier.
