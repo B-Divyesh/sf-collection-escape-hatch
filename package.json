@@ -1,0 +1,20 @@
+{
+  "name": "collection-escape-hatch-site",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config site/vite.config.ts",
+    "test": "cargo test && npm run test:site",
+    "test:site": "npm run build:site && playwright test",
+    "build": "npm run build:site && npm run build:cli",
+    "build:site": "vite build --config site/vite.config.ts && node scripts/build-sw.mjs",
+    "build:cli": "cargo build --release && node scripts/copy-binary.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.58.2",
+    "typescript": "5.9.2",
+    "vite": "7.3.6"
+  }
+}
