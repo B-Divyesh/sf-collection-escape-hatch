@@ -1,0 +1,37 @@
+{
+  "v": 8,
+  "name": "Acme Orders",
+  "variables": [
+    { "key": "baseUrl", "value": "https://api.example.test" },
+    { "key": "api_token", "value": "fixture-secret", "type": "secret" }
+  ],
+  "folders": [
+    {
+      "name": "Orders",
+      "folders": [],
+      "requests": [
+        {
+          "name": "Create order",
+          "method": "POST",
+          "endpoint": "{{baseUrl}}/orders",
+          "auth": { "authType": "bearer" },
+          "body": { "contentType": "application/json", "body": "{\"sku\":\"A-100\"}" },
+          "testScript": "pm.test('created', () => {\n  pm.response.to.have.status(201);\n});",
+          "responses": [
+            { "name": "Created", "status": 201, "body": "{\"id\":42}" }
+          ]
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "name": "Health",
+      "method": "GET",
+      "endpoint": "{{baseUrl}}/health",
+      "auth": { "authType": "none" },
+      "body": { "contentType": "none", "body": "" },
+      "responses": []
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "info": {
+    "name": "Acme Orders",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.example.test" },
+    { "key": "api_token", "value": "fixture-secret", "type": "secret" }
+  ],
+  "item": [
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create order",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/orders" },
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{api_token}}" }] },
+            "body": { "mode": "raw", "raw": "{\"sku\":\"A-100\"}" }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('created', () => {", "  pm.response.to.have.status(201);", "});"] } }
+          ],
+          "response": [
+            { "name": "Created", "code": 201, "body": "{\"id\":42}" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health",
+        "auth": { "type": "noauth" }
+      },
+      "response": []
+    }
+  ]
+}

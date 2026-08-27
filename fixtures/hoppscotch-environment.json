@@ -1,0 +1,7 @@
+{
+  "name": "Local",
+  "variables": [
+    { "key": "service_token", "value": "different-secret", "type": "secret" },
+    { "key": "region", "value": "west" }
+  ]
+}

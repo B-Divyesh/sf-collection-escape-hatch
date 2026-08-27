@@ -1,0 +1,21 @@
+meta {
+  name: Create order
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+body:json {
+  {"sku":"A-100"}
+}
+
+script:post-response {
+  test('created', () => {
+    expect(res.getStatus()).to.equal(201);
+  });
+}

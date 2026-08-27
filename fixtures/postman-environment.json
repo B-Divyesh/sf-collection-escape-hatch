@@ -1,0 +1,7 @@
+{
+  "name": "Local",
+  "values": [
+    { "key": "service_token", "value": "do-not-print", "type": "secret", "enabled": true },
+    { "key": "region", "value": "west", "enabled": true }
+  ]
+}
