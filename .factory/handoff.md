@@ -22,7 +22,7 @@ cargo package
 - `cargo clippy --all-targets -- -D warnings`: passed.
 - `npm audit`: 0 vulnerabilities.
 - `npm run build`: passed from the documented command. Static deploy root is exactly `dist/site/index.html`; optimized binary is `dist/bin/escape-hatch`.
-- `cargo package --allow-dirty`: passed and verified the crate. On the final committed tree, use `cargo package` without the flag. The factory should publish; this worker did not.
+- `cargo package`: passed on the final committed tree and produced the verified 184 KB crate archive. The factory should publish; this worker did not.
 - Factory `verify-url.sh`: HTTP 200; title present; `lang=en`; one `<h1>`; `<main>` present; 0 images missing alt; 0 unlabeled buttons; 0 console/page errors.
 - Lighthouse 12.8.2 mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100. LCP 1.2 s, CLS 0, total blocking time 0 ms (lab proxy; INP is not available without field interaction data).
 - Initial payload: 7.81 KB authored main JavaScript plus a 0.71 KB shared style loader, 15.99 KB CSS, 29 KB mobile hero / 104 KB desktop hero. This is below the 200 KB JS, 50 KB CSS, and 300 KB hero budgets.
