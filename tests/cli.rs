@@ -48,6 +48,7 @@ fn lossy_migration_fails_and_redacts_secrets() {
     let report = String::from_utf8(output.stdout).unwrap();
     assert!(report.contains("REQUEST_MISSING"));
     assert!(report.contains("VARIABLE_MISSING"));
+    assert!(report.contains("VARIABLE_VALUE_CHANGED"));
     assert!(!report.contains("do-not-print"));
     assert!(!report.contains("different-secret"));
     assert!(!report.contains("fixture-secret"));

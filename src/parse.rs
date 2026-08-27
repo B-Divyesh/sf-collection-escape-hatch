@@ -82,6 +82,7 @@ pub fn load_environment(path: &Path, scope: &str) -> Result<BTreeMap<String, Var
             continue;
         };
         let populated = entry.get("value").is_some_and(value_populated);
+        let fingerprint = entry.get("value").map(fingerprint_value).unwrap_or(0);
         let secret = is_secret_name(name)
             || entry
                 .get("type")
@@ -95,6 +96,7 @@ pub fn load_environment(path: &Path, scope: &str) -> Result<BTreeMap<String, Var
                 scope: scope.into(),
                 populated,
                 secret,
+                fingerprint,
             },
         );
     }
@@ -156,7 +158,15 @@ fn walk_postman(items: &[Value], parent: &str, inherited_auth: &str, inv: &mut I
         let url = json_url(request.get("url"));
         let auth = auth_type(request.get("auth")).unwrap_or_else(|| inherited_auth.into());
         let (body_kind, body_bytes) = postman_body(request.get("body"));
-        let scripts = postman_event_counts(item.get("event"));
+        let script_details = postman_event_details(item.get("event"));
+        let scripts = script_details
+            .iter()
+            .map(|(event, (lines, _))| (event.clone(), *lines))
+            .collect();
+        let script_fingerprints = script_details
+            .into_iter()
+            .map(|(event, (_, fingerprint))| (event, fingerprint))
+            .collect();
         let mut examples = BTreeMap::new();
         if let Some(responses) = item.get("response").and_then(Value::as_array) {
             for (idx, response) in responses.iter().enumerate() {
@@ -192,6 +202,7 @@ fn walk_postman(items: &[Value], parent: &str, inherited_auth: &str, inv: &mut I
                 body_kind,
                 body_bytes,
                 scripts,
+                script_fingerprints,
                 examples,
             },
         );
@@ -199,7 +210,7 @@ fn walk_postman(items: &[Value], parent: &str, inherited_auth: &str, inv: &mut I
 }
 
 fn add_postman_events(inv: &mut Inventory, path: &str, events: Option<&Value>) {
-    for (event, lines) in postman_event_counts(events) {
+    for (event, (lines, fingerprint)) in postman_event_details(events) {
         let key = format!("{path}::{event}");
         inv.scripts.insert(
             key,
@@ -207,12 +218,13 @@ fn add_postman_events(inv: &mut Inventory, path: &str, events: Option<&Value>) {
                 path: path.into(),
                 event,
                 lines,
+                fingerprint,
             },
         );
     }
 }
 
-fn postman_event_counts(events: Option<&Value>) -> BTreeMap<String, usize> {
+fn postman_event_details(events: Option<&Value>) -> BTreeMap<String, (usize, u64)> {
     let mut out = BTreeMap::new();
     for event in events.and_then(Value::as_array).into_iter().flatten() {
         let kind = event
@@ -220,12 +232,18 @@ fn postman_event_counts(events: Option<&Value>) -> BTreeMap<String, usize> {
             .and_then(Value::as_str)
             .unwrap_or("unknown")
             .replace("prerequest", "pre-request");
-        let lines = match event.pointer("/script/exec") {
-            Some(Value::Array(v)) => v.len(),
-            Some(Value::String(v)) => v.lines().count(),
-            _ => 0,
+        let (lines, content) = match event.pointer("/script/exec") {
+            Some(Value::Array(v)) => (
+                v.len(),
+                v.iter()
+                    .filter_map(Value::as_str)
+                    .collect::<Vec<_>>()
+                    .join("\n"),
+            ),
+            Some(Value::String(v)) => (v.lines().count(), v.clone()),
+            _ => (0, String::new()),
         };
-        out.insert(kind, lines);
+        out.insert(kind, (lines, fingerprint(&content)));
     }
     out
 }
@@ -315,6 +333,7 @@ fn walk_hopps(node: &Value, parent: &str, inv: &mut Inventory) {
                 .map(str::len)
                 .unwrap_or(0);
             let mut scripts = BTreeMap::new();
+            let mut script_fingerprints = BTreeMap::new();
             for (key, event) in [("preRequestScript", "pre-request"), ("testScript", "test")] {
                 if let Some(script) = request
                     .get(key)
@@ -322,6 +341,7 @@ fn walk_hopps(node: &Value, parent: &str, inv: &mut Inventory) {
                     .filter(|s| !s.trim().is_empty())
                 {
                     scripts.insert(event.into(), script.lines().count());
+                    script_fingerprints.insert(event.into(), fingerprint(script));
                 }
             }
             let mut examples = BTreeMap::new();
@@ -363,6 +383,7 @@ fn walk_hopps(node: &Value, parent: &str, inv: &mut Inventory) {
                     body_kind,
                     body_bytes,
                     scripts,
+                    script_fingerprints,
                     examples,
                 },
             );
@@ -451,6 +472,7 @@ fn walk_bruno_json(items: &[Value], parent: &str, inv: &mut Inventory) {
             .map(value_len)
             .unwrap_or(0);
         let mut scripts = BTreeMap::new();
+        let mut script_fingerprints = BTreeMap::new();
         for (key, event) in [
             ("preRequest", "pre-request"),
             ("postResponse", "test"),
@@ -463,6 +485,7 @@ fn walk_bruno_json(items: &[Value], parent: &str, inv: &mut Inventory) {
                 let n = value_lines(v);
                 if n > 0 {
                     scripts.insert(event.into(), n);
+                    script_fingerprints.insert(event.into(), fingerprint(&value_text(v)));
                 }
             }
         }
@@ -476,6 +499,7 @@ fn walk_bruno_json(items: &[Value], parent: &str, inv: &mut Inventory) {
                 body_kind,
                 body_bytes,
                 scripts,
+                script_fingerprints,
                 examples: BTreeMap::new(),
             },
         );
@@ -575,6 +599,7 @@ fn parse_bruno_files(files: &[PathBuf], name: &str) -> Result<Inventory, String>
                 .unwrap_or(0)
         };
         let mut scripts = BTreeMap::new();
+        let mut script_fingerprints = BTreeMap::new();
         for (header, event) in [
             ("script:pre-request", "pre-request"),
             ("script:post-response", "test"),
@@ -582,6 +607,7 @@ fn parse_bruno_files(files: &[PathBuf], name: &str) -> Result<Inventory, String>
         ] {
             if let Some(script) = bru_block(&content, header).filter(|s| !s.trim().is_empty()) {
                 scripts.insert(event.into(), script.lines().count());
+                script_fingerprints.insert(event.into(), fingerprint(&script));
             }
         }
         inv.requests.insert(
@@ -594,6 +620,7 @@ fn parse_bruno_files(files: &[PathBuf], name: &str) -> Result<Inventory, String>
                 body_kind,
                 body_bytes,
                 scripts,
+                script_fingerprints,
                 examples: BTreeMap::new(),
             },
         );
@@ -653,6 +680,7 @@ fn parse_bru_variables(content: &str, scope: &str) -> BTreeMap<String, Variable>
                         scope: scope.into(),
                         populated: !value.trim().is_empty(),
                         secret: header.ends_with("secret") || is_secret_name(name),
+                        fingerprint: fingerprint(value.trim()),
                     },
                 );
             }
@@ -684,6 +712,7 @@ fn add_variables(inv: &mut Inventory, values: Option<&Value>, scope: &str) {
                         .get("type")
                         .and_then(Value::as_str)
                         .is_some_and(|x| x.eq_ignore_ascii_case("secret")),
+                fingerprint: value.get("value").map(fingerprint_value).unwrap_or(0),
             },
         );
     }
@@ -697,7 +726,7 @@ fn auth_type(auth: Option<&Value>) -> Option<String> {
     auth.get("type")
         .or_else(|| auth.get("mode"))
         .and_then(Value::as_str)
-        .map(|s| normalize_auth(s))
+        .map(normalize_auth)
 }
 
 pub fn normalize_auth(auth: &str) -> String {
@@ -771,6 +800,28 @@ fn value_lines(v: &Value) -> usize {
         Value::Array(a) => a.len(),
         _ => 0,
     }
+}
+fn value_text(v: &Value) -> String {
+    match v {
+        Value::String(s) => s.clone(),
+        Value::Array(a) => a
+            .iter()
+            .filter_map(Value::as_str)
+            .collect::<Vec<_>>()
+            .join("\n"),
+        _ => serde_json::to_string(v).unwrap_or_default(),
+    }
+}
+fn fingerprint_value(value: &Value) -> u64 {
+    fingerprint(&serde_json::to_string(value).unwrap_or_default())
+}
+fn fingerprint(value: &str) -> u64 {
+    value
+        .as_bytes()
+        .iter()
+        .fold(0xcbf29ce484222325u64, |hash, byte| {
+            (hash ^ u64::from(*byte)).wrapping_mul(0x100000001b3)
+        })
 }
 fn is_secret_name(name: &str) -> bool {
     let n = name.to_ascii_lowercase();

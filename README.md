@@ -83,6 +83,6 @@ All verification happens in-process on your machine. There is no telemetry, netw
 
 ## License and format notes
 
-MIT licensed. See [LICENSE](LICENSE). Postman Collection v2.1 is consumed as an interoperable input format; Postman is a trademark of Postman, Inc. Hoppscotch exports and Bruno `.bru` files are read according to their public schemas/format documentation. This project is independent of those vendors.
+MIT licensed. See [LICENSE](LICENSE) and the maintained [format and license notes](docs/formats.md). Postman Collection v2.1 is consumed as an interoperable input format; Postman is a trademark of Postman, Inc. Hoppscotch exports and Bruno `.bru` files are read according to their public schemas/format documentation. This project is independent of those vendors.
 
 Live documentation: https://collection-escape-hatch.sociobot.in

@@ -100,7 +100,7 @@ pub fn compare(source: &Inventory, target: &Inventory) -> Report {
                 format!("{} bytes → {} bytes", src.body_bytes, dst.body_bytes),
             );
         }
-        compare_request_scripts(path, &src.scripts, &dst.scripts, &mut findings);
+        compare_request_scripts(path, src, dst, &mut findings);
         compare_examples(path, src, dst, &mut findings);
     }
 
@@ -237,6 +237,17 @@ fn compare_variables(source: &Inventory, target: &Inventory, findings: &mut Vec<
                 "values: [redacted]".into(),
             );
         }
+        if src.populated && dst.populated && src.fingerprint != dst.fingerprint {
+            add(
+                findings,
+                "VARIABLE_VALUE_CHANGED",
+                Severity::Warning,
+                "variables",
+                key,
+                "Variable value changed",
+                "source value: [redacted]; target value: [redacted]".into(),
+            );
+        }
     }
     for (key, _) in target
         .variables
@@ -278,17 +289,30 @@ fn compare_scoped_scripts(source: &Inventory, target: &Inventory, findings: &mut
             ),
             _ => {}
         }
+        if let Some(dst) = target.scripts.get(key)
+            && src.fingerprint != dst.fingerprint
+        {
+            add(
+                findings,
+                "SCRIPT_CONTENT_CHANGED",
+                Severity::Error,
+                "scripts",
+                &src.path,
+                "Collection or folder script content changed",
+                format!("event: {}; content: [redacted]", src.event),
+            );
+        }
     }
 }
 
 fn compare_request_scripts(
     path: &str,
-    source: &std::collections::BTreeMap<String, usize>,
-    target: &std::collections::BTreeMap<String, usize>,
+    source: &crate::model::Request,
+    target: &crate::model::Request,
     findings: &mut Vec<Finding>,
 ) {
-    for (event, src_lines) in source {
-        match target.get(event) {
+    for (event, src_lines) in &source.scripts {
+        match target.scripts.get(event) {
             None => add(
                 findings,
                 "SCRIPT_MISSING",
@@ -308,6 +332,21 @@ fn compare_request_scripts(
                 format!("{event}: {src_lines} → {dst_lines} lines"),
             ),
             _ => {}
+        }
+        if let (Some(src_fingerprint), Some(dst_fingerprint)) = (
+            source.script_fingerprints.get(event),
+            target.script_fingerprints.get(event),
+        ) && src_fingerprint != dst_fingerprint
+        {
+            add(
+                findings,
+                "SCRIPT_CONTENT_CHANGED",
+                Severity::Error,
+                "scripts",
+                path,
+                "Request script content changed",
+                format!("event: {event}; content: [redacted]"),
+            );
         }
     }
 }
@@ -440,5 +479,53 @@ mod tests {
             safe_url("https://a:b@example.com/x"),
             "https://[credentials-redacted]/x"
         );
+    }
+
+    #[test]
+    fn detects_changed_script_with_same_line_count() {
+        let mut source = Inventory::default();
+        let mut target = Inventory::default();
+        let mut a = crate::model::Request {
+            path: "A".into(),
+            ..Default::default()
+        };
+        a.scripts.insert("test".into(), 1);
+        a.script_fingerprints.insert("test".into(), 10);
+        let mut b = a.clone();
+        b.script_fingerprints.insert("test".into(), 20);
+        source.requests.insert("A".into(), a);
+        target.requests.insert("A".into(), b);
+        let report = compare(&source, &target);
+        assert!(
+            report
+                .findings
+                .iter()
+                .any(|f| f.code == "SCRIPT_CONTENT_CHANGED")
+        );
+    }
+
+    #[test]
+    fn changed_variable_value_is_reported_without_value() {
+        let mut source = Inventory::default();
+        let mut target = Inventory::default();
+        let variable = crate::model::Variable {
+            name: "token".into(),
+            scope: "environment".into(),
+            populated: true,
+            secret: true,
+            fingerprint: 1,
+        };
+        let mut changed = variable.clone();
+        changed.fingerprint = 2;
+        source
+            .variables
+            .insert("environment::token".into(), variable);
+        target
+            .variables
+            .insert("environment::token".into(), changed);
+        let report = compare(&source, &target);
+        let json = crate::render::render_json(&report).unwrap();
+        assert!(json.contains("VARIABLE_VALUE_CHANGED"));
+        assert!(json.contains("[redacted]"));
     }
 }

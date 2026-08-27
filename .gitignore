@@ -6,3 +6,6 @@ target/
 graphify-out/
 .DS_Store
 tmp/
+test-results/
+playwright-report/
+.factory/evidence/

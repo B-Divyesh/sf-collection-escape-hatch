@@ -72,6 +72,8 @@ pub struct Script {
     pub path: String,
     pub event: String,
     pub lines: usize,
+    #[serde(skip)]
+    pub fingerprint: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Default)]
@@ -88,6 +90,8 @@ pub struct Request {
     pub body_kind: String,
     pub body_bytes: usize,
     pub scripts: BTreeMap<String, usize>,
+    #[serde(skip)]
+    pub script_fingerprints: BTreeMap<String, u64>,
     pub examples: BTreeMap<String, Example>,
 }
 
@@ -104,6 +108,8 @@ pub struct Variable {
     pub scope: String,
     pub populated: bool,
     pub secret: bool,
+    #[serde(skip)]
+    pub fingerprint: u64,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]

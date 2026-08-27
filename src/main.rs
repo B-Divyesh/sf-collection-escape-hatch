@@ -66,16 +66,16 @@ fn main() {
         println!();
         return;
     };
-    match run(
+    match run(RunOptions {
         source,
         target,
         target_format,
         source_environment,
         target_environment,
-        if json { Format::Json } else { format },
+        format: if json { Format::Json } else { format },
         output,
         fail_on,
-    ) {
+    }) {
         Ok(failed) => {
             if failed {
                 std::process::exit(1)
@@ -88,22 +88,24 @@ fn main() {
     }
 }
 
-fn run(
-    source_path: PathBuf,
-    target_path: PathBuf,
+struct RunOptions {
+    source: PathBuf,
+    target: PathBuf,
     target_format: TargetFormat,
     source_environment: Option<PathBuf>,
     target_environment: Option<PathBuf>,
     format: Format,
     output: Option<PathBuf>,
     fail_on: FailOn,
-) -> Result<bool, String> {
-    let mut source = load_source(&source_path)?;
-    let mut target = load_target(&target_path, target_format)?;
-    if source_environment.is_some() != target_environment.is_some() {
+}
+
+fn run(options: RunOptions) -> Result<bool, String> {
+    let mut source = load_source(&options.source)?;
+    let mut target = load_target(&options.target, options.target_format)?;
+    if options.source_environment.is_some() != options.target_environment.is_some() {
         return Err("provide both --source-environment and --target-environment so environment structure can be compared".into());
     }
-    if let (Some(src), Some(dst)) = (source_environment, target_environment) {
+    if let (Some(src), Some(dst)) = (options.source_environment, options.target_environment) {
         source
             .variables
             .extend(load_environment(&src, "environment")?);
@@ -112,12 +114,12 @@ fn run(
             .extend(load_environment(&dst, "environment")?);
     }
     let report = compare(&source, &target);
-    let failed = report.should_fail(fail_on);
-    let rendered = match format {
+    let failed = report.should_fail(options.fail_on);
+    let rendered = match options.format {
         Format::Markdown => render_markdown(&report),
         Format::Json => render_json(&report)?,
     };
-    if let Some(path) = output {
+    if let Some(path) = options.output {
         std::fs::write(&path, rendered)
             .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
         eprintln!(
