@@ -1,0 +1,10 @@
+{
+  "slug": "collection-escape-hatch",
+  "title": "Collection Escape Hatch",
+  "territory": "devtools-data",
+  "user": "An API developer moving a team off Postman who needs to prove that collections, environments, auth, scripts, and examples survived the move before changing the team's daily client.",
+  "smallest_useful_product": "A local CLI that reads Postman v2.1 plus one target export (initially Bruno/Hoppscotch), checks requests, folders, variables, auth, scripts, examples, and body sizes, then emits a Markdown/JSON migration report.",
+  "artifact_class": "cli",
+  "monetization": "free",
+  "constraints": "Must run fully locally; redact secret values while preserving variable names and structure; track Postman and target-format licenses and schemas."
+}
