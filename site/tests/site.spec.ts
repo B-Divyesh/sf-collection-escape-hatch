@@ -17,9 +17,13 @@ test('one click opens the isolated demo with a finished report', async ({ page }
 });
 
 test('direct demo supports reset and start-for-real', async ({ page }) => {
-  await page.goto('/demo/');
+  await page.goto('/demo');
+  await expect(page).toHaveURL('/demo/');
   await expect(page.locator('h1')).toHaveText('Compare a sample Postman migration');
+  await expect(page.locator('h1')).toBeFocused();
   await expect(page.getByText('Changes found', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.locator('h1')).toBeFocused();
   await page.getByRole('button', { name: 'Reset demo' }).first().click();
   await expect(page.getByText(/METHOD_CHANGED/)).toBeVisible();
   await page.getByRole('button', { name: 'Start for real' }).click();

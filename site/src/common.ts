@@ -22,6 +22,13 @@ export function setupCommonShell() {
   });
   addEventListener('popstate', () => focusDestination());
   if (location.hash) requestAnimationFrame(() => focusDestination());
+  else if (location.pathname !== '/') requestAnimationFrame(() => {
+    const heading = document.querySelector<HTMLElement>('main h1');
+    if (!heading) return;
+    heading.tabIndex = -1;
+    heading.focus();
+    if (announcer) announcer.textContent = heading.textContent ?? 'Page changed';
+  });
 }
 
 export function registerServiceWorker() {
