@@ -91,3 +91,34 @@ fn invalid_input_uses_exit_code_two() {
     assert_eq!(output.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&output.stderr).contains("not a Postman Collection v2.1"));
 }
+
+#[test]
+fn changed_url_query_secrets_are_redacted_in_json_and_markdown() {
+    for arguments in [vec!["--json"], vec!["--format", "markdown"]] {
+        let output = cli()
+            .args([
+                "verify",
+                "--source",
+                "fixtures/postman-query-secret-source.json",
+                "--target",
+                "fixtures/hoppscotch-query-secret-target.json",
+            ])
+            .args(arguments)
+            .output()
+            .unwrap();
+        assert_eq!(output.status.code(), Some(1));
+        let report = String::from_utf8(output.stdout).unwrap();
+        assert!(report.contains("URL_CHANGED"));
+        assert!(report.contains("token=[redacted]"));
+        assert!(report.contains("api_key=[redacted]"));
+        assert!(report.contains("page=1"));
+        for secret in [
+            "source-query-sentinel",
+            "source-key-sentinel",
+            "target-query-sentinel",
+            "target-key-sentinel",
+        ] {
+            assert!(!report.contains(secret), "report leaked {secret}");
+        }
+    }
+}

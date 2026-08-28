@@ -14,7 +14,7 @@
       <nav aria-label="Legal navigation"><a href="/">Product</a><a href="/terms/">Terms</a></nav>
     </header>
     <main id="main" class="legal-main sheet-width">
-      <p class="eyebrow"><span>P–01</span> Effective 27 August 2026</p>
+      <p class="eyebrow"><span>P–01</span> Effective 28 August 2026</p>
       <h1>Private by construction.</h1>
       <article class="legal-sheet">
         <h2>What the verifier processes</h2>
@@ -22,7 +22,7 @@
         <h2>What we collect</h2>
         <p>Nothing. This v1 ships without analytics, cookies, accounts, telemetry, crash reporting, or server-side storage. The static site may be served with ordinary short-lived infrastructure access logs controlled by the hosting platform.</p>
         <h2>Redaction boundary</h2>
-        <p>Reports retain artifact paths, request URLs, method names, variable names, scopes, and structural metadata. Variable values are represented as <code>[redacted]</code>. URLs containing inline credentials are redacted. Review generated metadata before sharing it outside your team.</p>
+        <p>Reports retain artifact paths, sanitized request URLs, method names, variable names, scopes, and structural metadata. Variable values are represented as <code>[redacted]</code>. URLs containing inline credentials are replaced with <code>[credentials-redacted]</code>; values for credential-bearing query names such as <code>token</code>, <code>api_key</code>, <code>secret</code>, <code>signature</code>, and <code>authorization</code> are replaced with <code>[redacted]</code>. Parameter names and non-sensitive URL structure stay visible for review.</p>
         <h2>Offline cache</h2>
         <p>The site uses a service worker to cache its public application shell on your device. It never caches files you select in the demo. Clear the site data in your browser to remove that public cache.</p>
         <h2>Questions</h2>

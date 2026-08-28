@@ -13,7 +13,7 @@ cargo install --path .
 escape-hatch --help
 ```
 
-Version 0.1.0 supports Postman Collection v2.1 sources and Bruno `.bru` directories, Bruno JSON collections, or Hoppscotch JSON exports as targets.
+Version 0.1.1 supports Postman Collection v2.1 sources and Bruno `.bru` directories, Bruno JSON collections, or Hoppscotch JSON exports as targets.
 
 ## Usage
 
@@ -39,7 +39,7 @@ escape-hatch verify \
   --output migration-report.json
 ```
 
-`--json` is shorthand for `--format json`. Omit `--output` to print the report to stdout. Input values are never included in either format; the report records variable names and whether a value is populated or marked secret.
+`--json` is shorthand for `--format json`. Omit `--output` to print the report to stdout. Variable values are never included in either format; the report records variable names and whether a value is populated or marked secret.
 
 Exit codes:
 
@@ -79,7 +79,7 @@ Every finding has a stable code, severity, category, artifact path, and evidence
 
 ## Privacy and security
 
-All verification happens in-process on your machine. There is no telemetry, network client, cloud sync, or request execution in the CLI or the site demo. Treat generated reports as metadata: they contain request names, paths, methods, URLs, and variable names, but never variable values or headers.
+All verification happens in-process on your machine. There is no telemetry, network client, cloud sync, or request execution in the CLI or the site demo. Treat generated reports as metadata: they contain request names, paths, methods, sanitized URLs, and variable names, but never variable values or headers. URL authority credentials are replaced with `[credentials-redacted]`; query values for credential-bearing names are replaced with `[redacted]`. The query-name policy is case-insensitive (with `-` and `_` treated alike) and covers `token`, token variants, `api_key`/`apikey`, `key`, `secret`, `signature`/`sig`, `authorization`, `credential`, `password`, `session`, and `jwt`; parameter names and non-sensitive URL structure remain visible for review.
 
 ## License and format notes
 

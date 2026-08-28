@@ -434,17 +434,102 @@ fn normalize_url(value: &str) -> String {
         .replace("%7D%7D", "}}")
 }
 fn safe_url(value: &str) -> String {
-    let trimmed = value.trim();
-    if let Some((scheme, rest)) = trimmed.split_once("://") {
-        let authority = rest.split('/').next().unwrap_or(rest);
-        if authority.contains('@') {
-            return format!(
-                "{scheme}://[credentials-redacted]{}",
-                rest.find('/').map(|i| &rest[i..]).unwrap_or("")
-            );
-        }
+    let without_credentials = redact_authority_credentials(value.trim());
+    redact_sensitive_query_values(&without_credentials)
+}
+
+/// Keep URLs useful in reports without exposing common credential-bearing
+/// components. Query parameter names and non-sensitive values remain visible
+/// so a reviewer can still identify the URL shape that changed.
+fn redact_authority_credentials(value: &str) -> String {
+    let Some((scheme, rest)) = value.split_once("://") else {
+        return value.into();
+    };
+    let authority_end = rest.find(['/', '?', '#']).unwrap_or(rest.len());
+    if !rest[..authority_end].contains('@') {
+        return value.into();
     }
-    trimmed.into()
+    format!(
+        "{scheme}://[credentials-redacted]{}",
+        &rest[authority_end..]
+    )
+}
+
+fn redact_sensitive_query_values(value: &str) -> String {
+    let Some(query_start) = value.find('?') else {
+        return value.into();
+    };
+    let (before_query, query_and_fragment) = value.split_at(query_start + 1);
+    let (query, fragment) = match query_and_fragment.split_once('#') {
+        Some((query, fragment)) => (query, format!("#{fragment}")),
+        None => (query_and_fragment, String::new()),
+    };
+    let redacted = query
+        .split('&')
+        .map(|parameter| match parameter.split_once('=') {
+            Some((name, _)) if is_sensitive_query_parameter(name) => {
+                format!("{name}=[redacted]")
+            }
+            _ => parameter.into(),
+        })
+        .collect::<Vec<_>>()
+        .join("&");
+    format!("{before_query}{redacted}{fragment}")
+}
+
+fn is_sensitive_query_parameter(name: &str) -> bool {
+    let mut normalized = percent_decode(name)
+        .to_ascii_lowercase()
+        .replace(['-', '.'], "_");
+    normalized = normalized.trim_end_matches("[]").into();
+    matches!(
+        normalized.as_str(),
+        "token"
+            | "access_token"
+            | "id_token"
+            | "refresh_token"
+            | "api_key"
+            | "apikey"
+            | "key"
+            | "secret"
+            | "client_secret"
+            | "signature"
+            | "sig"
+            | "authorization"
+            | "credential"
+            | "password"
+            | "session"
+            | "jwt"
+    )
+}
+
+fn percent_decode(value: &str) -> String {
+    let bytes = value.as_bytes();
+    let mut decoded = Vec::with_capacity(bytes.len());
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] == b'%'
+            && index + 2 < bytes.len()
+            && let (Some(high), Some(low)) =
+                (hex_value(bytes[index + 1]), hex_value(bytes[index + 2]))
+        {
+            decoded.push(high * 16 + low);
+            index += 3;
+            continue;
+        }
+        decoded.push(bytes[index]);
+        index += 1;
+    }
+    String::from_utf8_lossy(&decoded).into_owned()
+}
+
+fn hex_value(value: u8) -> Option<u8> {
+    match value {
+        b'0'..=b'9' => Some(value - b'0'),
+        b'a'..=b'f' => Some(value - b'a' + 10),
+        b'A'..=b'F' => Some(value - b'A' + 10),
+        _ => None,
+    }
 }
 fn canonical_body(kind: &str) -> String {
     match kind.to_ascii_lowercase().as_str() {
@@ -478,6 +563,20 @@ mod tests {
         assert_eq!(
             safe_url("https://a:b@example.com/x"),
             "https://[credentials-redacted]/x"
+        );
+    }
+
+    #[test]
+    fn sensitive_query_values_are_redacted_but_url_shape_remains() {
+        assert_eq!(
+            safe_url(
+                "https://api.example.test/items?token=source-secret&api-key=target-secret&page=2#results"
+            ),
+            "https://api.example.test/items?token=[redacted]&api-key=[redacted]&page=2#results"
+        );
+        assert_eq!(
+            safe_url("https://a:b@example.com?%74oken=encoded-secret"),
+            "https://[credentials-redacted]?%74oken=[redacted]"
         );
     }
 
