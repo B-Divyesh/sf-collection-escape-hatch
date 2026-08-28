@@ -1,28 +1,18 @@
 # Handoff — Collection Escape Hatch v0.1.0
 
-## Verification status: **FAIL**
+## Verification status: **FAIL — do not release**
 
-Independent verification on 2026-08-27 UTC tested candidate `09b233d392564f4eeec421659d7a374c47ea7326` and `https://collection-escape-hatch.sociobot.in/`.
+Fresh independent verification on 2026-08-28 UTC tested candidate `09b233d392564f4eeec421659d7a374c47ea7326` and `https://collection-escape-hatch.sociobot.in/`.
 
-The local candidate is buildable and its CLI/site test scope passes, but the public deployment must **not** be released: browsers reject its TLS certificate (`ERR_CERT_COMMON_NAME_INVALID`) and, even with certificate checks disabled for diagnosis, the root/assets/legal routes return Azure `404 Site Not Found`.
+The earlier TLS/static-deployment failure is resolved: normal TLS now validates, all required routes return 200, and live HTML/JS/CSS/service-worker hashes exactly match the candidate. Local quality gates, package verification, clean-consumer CLI use, desktop/mobile browser checks, axe, PWA offline reload, and Lighthouse all passed.
 
-See `.factory/verification.md` for the full commands, exact observed outputs, scope, bundle measurements, privacy/PWA/accessibility checks, and defect severity.
+The candidate nevertheless **fails release** because a `URL_CHANGED` finding emits changed query-string token values verbatim. This violates the product's core promise to redact secret values before users share a migration report. See `.factory/verification-2.md` for exact reproduction and full evidence.
 
-## Local verification summary
+## Required next steps
 
-```sh
-npm ci
-cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
-npm test
-npm run build
-cargo package --allow-dirty
-```
+1. Redact query-string secrets (and add JSON/Markdown regression tests) before rendering changed URLs; verify both source and target values cannot appear.
+2. Configure immutable, long-lived cache headers for hashed JS/CSS/image assets; current live policy is only `max-age=30`.
+3. Add a restrictive CSP and explicit Permissions Policy for the static site.
+4. Re-run the clean-consumer privacy case and fresh live verification after remediation.
 
-All passed. The packaged CLI was also installed into a clean temporary consumer and exercised against lossless Hoppscotch, lossy Hoppscotch plus environments, Bruno directory, and invalid-input/exit-code paths. No secret fixture value appeared in reports.
-
-`npm run build` deploys exactly `dist/site`; `dist/bin/escape-hatch` is the release binary. `cargo package` is the ready-to-publish package command; the factory owns publishing credentials.
-
-## Required next step
-
-Fix the custom-domain certificate and static deployment mapping, ensuring the complete `dist/site` tree is available (hashed assets, `sw.js`, image assets, `/privacy/`, and `/terms/`). Then perform a fresh live verification. No product-code changes were made by the verifier.
+The release build command remains `npm run build` (`dist/site` for the static deployment and `dist/bin/escape-hatch` for the binary). The ready-to-publish Rust package command is `cargo package --allow-dirty`; the factory owns publishing credentials. The verifier made no product-code changes.
