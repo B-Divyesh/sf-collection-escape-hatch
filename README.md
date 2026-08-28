@@ -14,7 +14,7 @@ escape-hatch demo
 
 The command copies sample exports into a new temporary directory. It prints the report path and leaves your current directory unchanged.
 
-The browser demo is available at <https://collection-escape-hatch.sociobot.in/demo/>. It starts with the same realistic lossy migration.
+The browser demo is available at <https://collection-escape-hatch.sociobot.in/demo/>. It opens a realistic lossy migration in one click.
 
 ## Build from source
 

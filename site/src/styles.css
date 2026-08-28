@@ -157,6 +157,7 @@ h3 { font-size: 1.3rem; }
 footer { padding-block: 38px; border-top: 2px solid var(--ink); background: var(--surface); }
 .footer-grid { display: grid; grid-template-columns: 1fr 1fr auto; align-items: center; gap: 30px; }.footer-grid p { margin: 0; color: var(--muted); font-size: .85rem; }.footer-grid nav { display: flex; gap: 24px; }.footer-grid nav a { min-height: 44px; display: inline-flex; align-items: center; }
 .legal-main { min-height: calc(100vh - 250px); padding-block: 88px 120px; }.legal-main h1 { max-width: 900px; font-size: clamp(3rem, 7vw, 5.5rem); }.legal-sheet { max-width: 780px; margin-top: 56px; padding: 40px; border: 1px solid var(--line-strong); background: rgba(247,251,248,.88); box-shadow: 8px 8px 0 var(--line); }.legal-sheet h2 { margin-top: 44px; font-size: 1.65rem; }.legal-sheet h2:first-child { margin-top: 0; }.legal-sheet p, .legal-sheet li { color: var(--muted); }.legal-sheet code { color: var(--ink); font-family: var(--mono); }
+.legal-sheet a { min-height: 44px; display: inline-flex; align-items: center; }
 .limits-section { border-block: 1px solid var(--line-strong); background: var(--surface); }
 .limits-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 80px; }
 .limits-grid > div p { max-width: 62ch; color: var(--muted); font-size: 1.08rem; }

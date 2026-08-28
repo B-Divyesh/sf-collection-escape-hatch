@@ -6,7 +6,7 @@ use collection_escape_hatch::{
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-/// Prove an API collection survived its move—without sending a request.
+/// Compare a Postman migration without sending requests.
 #[derive(Parser, Debug)]
 #[command(name = "escape-hatch", version, about, long_about = None, disable_help_subcommand = true)]
 struct Cli {

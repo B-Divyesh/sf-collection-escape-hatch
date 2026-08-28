@@ -1,5 +1,19 @@
 [
   {
+    "id": "one-click-demo",
+    "claim": "One click opens a finished report in an isolated browser demo with reset and exit controls",
+    "where": "landing first screen, browser demo banner, README",
+    "test": "npm run test:claim -- --grep '@claim:one-click-demo'",
+    "sandbox": "fresh browser context opened at the landing page"
+  },
+  {
+    "id": "isolated-cli-demo",
+    "claim": "escape-hatch demo writes bundled samples and a report to a new temporary directory without changing the caller directory",
+    "where": "landing recorded run, demo route, README, .factory/demo.md",
+    "test": "npm run test:claim -- --grep '@claim:isolated-cli-demo'",
+    "sandbox": "built CLI launched from a new temporary caller directory containing a sentinel file"
+  },
+  {
     "id": "supported-formats",
     "claim": "Compares Postman Collection v2.1 with Bruno directories, Bruno JSON, and Hoppscotch JSON",
     "where": "landing first screen, how it works, README",
@@ -15,7 +29,7 @@
   },
   {
     "id": "local-private",
-    "claim": "The CLI and browser demo run locally without request execution, uploads, telemetry, or script execution",
+    "claim": "The CLI and browser demo run locally without request execution, uploads, analytics, telemetry, cloud sync, or script execution",
     "where": "landing facts and limits, privacy, README",
     "test": "npm run test:claim -- --grep '@claim:local-private'",
     "sandbox": "local trap endpoint, script sentinel, dependency audit, and browser request interception"
@@ -43,7 +57,7 @@
   },
   {
     "id": "browser-isolation",
-    "claim": "The browser demo stores no selected files, preserves real storage, and rejects files over 10 MB",
+    "claim": "The browser demo preserves real state; stores no selected files in browser storage, cookies, OPFS, or caches; and rejects files over 10 MB",
     "where": "demo banner and controls, privacy, README",
     "test": "npm run test:claim -- --grep '@claim:browser-isolation'",
     "sandbox": "fresh browser context with real-storage sentinels, cache and IndexedDB checks, request capture, and boundary file"

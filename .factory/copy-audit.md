@@ -1,51 +1,70 @@
 # Copy audit — polish 1
 
-Method: visible prose sentences are split at terminal punctuation. Hyphenated terms and inline code count as one word. Navigation, labels, table cells, and code are audited as interface fragments.
+Method: whitespace-delimited words. Hyphenated terms and inline code count as one word. Navigation, table cells, status labels, and code are interface fragments.
 
 ## First screen
 
 | Words | Sentence |
 | ---: | --- |
-| 7 | Check what survived your Postman migration. |
+| 5 | Compare your Postman migration exports. |
 | 15 | For API teams moving to Bruno or Hoppscotch, compare both exports before anyone switches clients. |
-| 10 | The sample opens a finished report in one click. |
+| 9 | The sample opens a finished report in one click. |
 
-The headline starts with a verb and contains seven words. The next sentence names the audience, situation, and outcome. The first action is **Try it with sample data**.
+The headline starts with a verb. The next sentence names the audience and situation. **Try it with sample data** is the primary action. **Runs locally**, **Works offline after first visit**, and **Free under MIT** are visible at 390 × 844.
 
-## Landing page
+## Remaining landing-page sentences
 
 | Words | Sentence |
 | ---: | --- |
-| 8 | Compare exported structure without sending API requests. |
+| 7 | Compare exported structure without sending API requests. |
 | 10 | One read-only comparison creates a report your team can review. |
-| 13 | Use the original Postman v2.1 export and the Bruno or Hoppscotch export. |
-| 17 | Requests match by folder path and name. The CLI compares fields, scripts, examples, variables, and body bytes. |
-| 17 | Review Markdown with your team. Use stable JSON and exit codes to check saved migration examples in CI. |
-| 14 | Each finding includes a stable code, severity, category, artifact path, and redacted evidence. |
-| 15 | The browser demo compares selected JSON in memory. Use the CLI for Bruno exports and full reports. |
-| 16 | The CLI does not send requests or run scripts. It cannot prove that both API clients behave the same. |
-| 14 | Reports remove variable values, headers, URL credentials, and sensitive query values before rendering. |
-| 17 | Clone the repository, then install the CLI with Cargo. No account is required. |
-| 17 | Compare both exports, save the report, and review each finding with the people who own the API workflows. |
+| 12 | Use the original Postman v2.1 export and the Bruno or Hoppscotch export. |
+| 7 | Requests match by folder path and name. |
+| 10 | The CLI compares fields, scripts, examples, variables, and body bytes. |
+| 5 | Review Markdown with your team. |
+| 13 | Use stable JSON and exit codes to compare saved migration examples in CI. |
+| 13 | Each finding includes a stable code, severity, category, artifact path, and redacted evidence. |
+| 8 | The browser demo compares selected JSON in memory. |
+| 9 | Use the CLI for Bruno exports and full reports. |
+| 9 | Selected files stay in memory and are never stored. |
+| 3 | No report yet. |
+| 8 | Choose both exports or try the sample data. |
+| 9 | The CLI does not send requests or run scripts. |
+| 10 | It cannot prove that both API clients behave the same. |
+| 13 | Reports remove variable values, headers, URL credentials, and sensitive query values before rendering. |
+| 9 | Clone the repository, then install the CLI with Cargo. |
+| 4 | No account is required. |
+| 18 | Compare both exports, save the report, and review each finding with the people who own the API workflows. |
+| 8 | Compare Postman migrations before your team switches clients. |
 
-No sentence exceeds 22 words. No banned marketing word appears.
+Headings and actions were also read out of context. They consistently use **compare** for the action, **report** for the output, **browser demo** for the interactive area, and **finding** for one reported difference.
 
-## Dynamic and demo copy
+## Demo and dynamic messages
 
-| Words | Sentence |
+| Words | Sentence or template |
 | ---: | --- |
 | 7 | Demo — sample data, nothing is saved. |
-| 8 | Changes stay in a separate in-memory workspace. |
-| 9 | Choose both exports or try the sample data. |
-| 12 | Reading names, scopes, and field shapes on this device. |
-| 14 | The CLI writes its report inside a new temporary directory. It leaves your current directory unchanged. |
-| 15 | The Acme Orders sample already shows what changed in a lossy Hoppscotch import. |
-
-Error messages state what failed and what to do next. No dynamic sentence exceeds 22 words.
+| 7 | Changes stay in a separate in-memory workspace. |
+| 13 | The Acme Orders sample already shows what changed in a lossy Hoppscotch import. |
+| 10 | The CLI writes its report inside a new temporary directory. |
+| 7 | It leaves your current directory unchanged. |
+| 9 | `[file]` is over the 10 MB browser demo limit. |
+| 5 | Use the CLI for larger exports. |
+| 5 | `[file]` is not valid JSON. |
+| 7 | Export the collection again and retry. |
+| 13 | Choose both a Postman source and Hoppscotch target, or try the sample data. |
+| 9 | Reading names, scopes, and field shapes on this device. |
+| 8 | Source is not a Postman Collection v2.1 export. |
+| 7 | Export the collection as v2.1 and retry. |
+| 7 | Target is not a Hoppscotch collection export. |
+| 7 | Use the CLI to compare Bruno exports. |
+| 4 | No structural differences found. |
+| 6 | Run client-specific smoke tests before switching. |
+| 2 | Comparison stopped. |
 
 ## README
 
-The README was rewritten into short outcome-first sentences. Its longest prose sentence is 21 words. A source scan finds no banned marketing words and no unsupported release-download claim.
+All prose sentences were counted after removing code blocks, headings, and table fragments. The longest contains 14 words. There is no banned marketing term or unsupported release-download claim.
 
 ## Terminology
 
@@ -57,4 +76,4 @@ The README was rewritten into short outcome-first sentences. Its longest prose s
 | One detected issue | finding |
 | Inputs | source export and target export |
 
-Technical compatibility names remain only where users need exact commands or schema identifiers.
+No sentence exceeds 22 words. No banned word appears.

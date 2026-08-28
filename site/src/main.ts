@@ -33,10 +33,14 @@ optional('load-sample')?.addEventListener('click', () => enterDemo(true));
 optional('run-demo')?.addEventListener('click', () => runComparison());
 optional('clear-demo')?.addEventListener('click', () => demoMode ? resetDemo() : clearReal());
 optional('reset-demo-banner')?.addEventListener('click', resetDemo);
+document.querySelectorAll<HTMLAnchorElement>('[data-enter-demo]').forEach(link => link.addEventListener('click', event => {
+  event.preventDefault();
+  enterDemo(true);
+}));
 optional('start-real')?.addEventListener('click', () => {
   demoState.source = null;
   demoState.target = null;
-  location.assign('/');
+  location.replace('/');
 });
 
 document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach(button => button.addEventListener('click', async () => {
@@ -83,12 +87,16 @@ addEventListener('popstate', () => {
     demoState.target = null;
     optional('demo-banner')?.setAttribute('hidden', '');
     document.body.classList.remove('demo-mode');
-    document.title = 'Collection Escape Hatch — check Postman migrations';
+    document.title = 'Collection Escape Hatch — compare Postman migrations';
     setCanonical('https://collection-escape-hatch.sociobot.in/');
-    setMeta('meta[property="og:title"]', 'Check what survived your Postman migration');
+    setMeta('meta[name="description"]', 'Compare Postman exports with Bruno or Hoppscotch and find missing migration data before your team switches clients.');
+    setMeta('meta[property="og:title"]', 'Compare your Postman migration exports');
+    setMeta('meta[property="og:description"]', 'Compare Postman exports with Bruno or Hoppscotch and find missing migration data before your team switches clients.');
     setMeta('meta[property="og:url"]', 'https://collection-escape-hatch.sociobot.in/');
-    setMeta('meta[name="twitter:title"]', 'Check what survived your Postman migration');
+    setMeta('meta[name="twitter:title"]', 'Compare your Postman migration exports');
+    setMeta('meta[name="twitter:description"]', 'Compare Postman exports with Bruno or Hoppscotch before your team switches clients.');
     renderRealState();
+    focusPageHeading('hero-title', 'Home loaded');
   }
 });
 
@@ -113,19 +121,26 @@ function enterDemo(updateUrl: boolean) {
   if (updateUrl && location.pathname === '/') history.pushState({ demo: true }, '', '/?demo=1');
   document.title = 'Demo — Collection Escape Hatch';
   setCanonical('https://collection-escape-hatch.sociobot.in/demo/');
+  setMeta('meta[name="description"]', 'Try a local Postman-to-Hoppscotch migration comparison with isolated sample data.');
   setMeta('meta[property="og:title"]', 'Demo — Collection Escape Hatch');
+  setMeta('meta[property="og:description"]', 'Try a local Postman-to-Hoppscotch migration comparison with isolated sample data.');
   setMeta('meta[property="og:url"]', 'https://collection-escape-hatch.sociobot.in/demo/');
   setMeta('meta[name="twitter:title"]', 'Demo — Collection Escape Hatch');
+  setMeta('meta[name="twitter:description"]', 'Try a local migration comparison with isolated sample data.');
   runComparison(true);
   if (updateUrl) requestAnimationFrame(focusDemo);
 }
 
 function focusDemo() {
   document.getElementById('demo')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-  const title = optional('demo-title');
+  focusPageHeading('demo-title', 'Browser demo loaded');
+}
+
+function focusPageHeading(id: string, fallback: string) {
+  const title = optional(id);
   if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
   const announcer = optional('route-announcer');
-  if (announcer) announcer.textContent = title?.textContent ?? 'Browser demo loaded';
+  if (announcer) announcer.textContent = title?.textContent ?? fallback;
 }
 
 function resetDemo() {
@@ -173,6 +188,9 @@ function renderRealState() {
 async function selectFile(input: HTMLInputElement, source: boolean) {
   const file = input.files?.[0];
   if (!file) return;
+  const state = activeState();
+  if (source) { state.source = null; state.sourceName = file.name; }
+  else { state.target = null; state.targetName = file.name; }
   const name = optional(source ? 'source-name' : 'target-name');
   if (name) name.textContent = file.name;
   if (file.size > 10 * 1024 * 1024) {
@@ -181,7 +199,6 @@ async function selectFile(input: HTMLInputElement, source: boolean) {
   }
   try {
     const parsed = JSON.parse(await file.text());
-    const state = activeState();
     if (source) { state.source = parsed; state.sourceName = file.name; }
     else { state.target = parsed; state.targetName = file.name; }
   } catch {
@@ -212,7 +229,7 @@ async function runComparison(immediate = false) {
 
 function inspect(source: Record<string, unknown>, target: Record<string, unknown>) {
   const schema = (source.info as { schema?: string } | undefined)?.schema ?? '';
-  if (!schema.includes('v2.1')) throw new Error('Source is not a Postman Collection v2.1 export. Check the export version and retry.');
+  if (!schema.includes('v2.1')) throw new Error('Source is not a Postman Collection v2.1 export. Export the collection as v2.1 and retry.');
   if (!Array.isArray(target.folders) && !Array.isArray(target.requests)) throw new Error('Target is not a Hoppscotch collection export. Use the CLI to compare Bruno exports.');
   const src = new Map<string, RequestShape>();
   const folders = new Set<string>();
@@ -277,7 +294,7 @@ function showError(message: string) {
   output.className = 'empty-report';
   output.innerHTML = `<span class="empty-mark" aria-hidden="true">!</span><p><strong>Comparison stopped.</strong><br>${escapeHtml(message)}</p>`;
   verdict.className = 'verdict bad';
-  verdict.textContent = 'Check the exports';
+  verdict.textContent = 'Fix the exports';
 }
 
 function join(parent: string, name: string) { return parent ? `${parent}/${name.replaceAll('/', '∕')}` : name.replaceAll('/', '∕'); }
