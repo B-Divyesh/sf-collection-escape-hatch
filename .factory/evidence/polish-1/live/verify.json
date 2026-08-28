@@ -1,0 +1,14 @@
+{
+  "url": "https://collection-escape-hatch.sociobot.in",
+  "loadMs": 1000,
+  "errors": [],
+  "a11y": {
+    "title": "Collection Escape Hatch — compare Postman migrations",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 2820
+  }
+}

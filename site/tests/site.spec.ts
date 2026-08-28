@@ -36,7 +36,7 @@ test('demo history restores route metadata and focus', async ({ page }) => {
 
 test('direct demo supports reset and start-for-real', async ({ page }) => {
   await page.goto('/demo');
-  await expect(page).toHaveURL('/demo/');
+  await expect(page).toHaveURL(/\/demo\/?$/);
   await expect(page.locator('h1')).toHaveText('Compare a sample Postman migration');
   await expect(page.locator('h1')).toBeFocused();
   await expect(page.getByText('Changes found', { exact: true })).toBeVisible();
@@ -100,7 +100,8 @@ test('internal navigation links resolve without dead ends', async ({ page, reque
   for (const path of ['/', '/demo/', '/privacy/', '/terms/']) {
     await page.goto(path);
     const hrefs = await page.locator('a[href]').evaluateAll(links => links.map(link => (link as HTMLAnchorElement).href));
-    for (const href of hrefs.filter(href => new URL(href).origin === 'http://127.0.0.1:4173')) {
+    const currentOrigin = new URL(page.url()).origin;
+    for (const href of hrefs.filter(href => new URL(href).origin === currentOrigin)) {
       const url = new URL(href);
       url.hash = '';
       if (checked.has(url.href)) continue;

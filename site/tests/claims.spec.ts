@@ -134,7 +134,7 @@ test('@claim:local-private compares without requests, uploads, telemetry, or scr
   await page.locator('#target-file').setInputFiles(lossy);
   await page.getByRole('button', { name: 'Compare exports' }).click();
   await expect(page.getByText('Changes found', { exact: true })).toBeVisible();
-  expect(new Set(browserRequests.map(request => request.origin))).toEqual(new Set(['http://127.0.0.1:4173']));
+  expect(new Set(browserRequests.map(request => request.origin))).toEqual(new Set([new URL(page.url()).origin]));
   expect(browserRequests.every(request => ['GET', 'HEAD'].includes(request.method) && !request.hasBody)).toBeTruthy();
 });
 
@@ -227,7 +227,7 @@ test('@claim:browser-isolation keeps demo and selected files out of persistent s
   expect(state.opfsEntries).toEqual([]);
   expect(state.cacheKeys.every(key => key === 'escape-hatch-v2')).toBeTruthy();
   expect(state.cacheEntries.some(path => path.includes('postman-complete') || path.includes('hoppscotch-lossy'))).toBeFalsy();
-  expect(requests.every(url => new URL(url).origin === 'http://127.0.0.1:4173')).toBeTruthy();
+  expect(requests.every(url => new URL(url).origin === new URL(page.url()).origin)).toBeTruthy();
   expect(await context.cookies()).toEqual([]);
   await context.clearCookies();
 });
