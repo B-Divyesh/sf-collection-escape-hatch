@@ -13,6 +13,7 @@ test('one click opens the isolated demo with a finished report', async ({ page }
   await expect(page.getByText('Changes found', { exact: true })).toBeVisible();
   await expect(page.getByText(/METHOD_CHANGED/)).toBeVisible();
   await expect(page.locator('#demo-title')).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(await page.evaluate(() => innerWidth));
   expect(errors).toEqual([]);
 });
 
