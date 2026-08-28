@@ -15,14 +15,14 @@ createServer(async (request, response) => {
   }
   const relative = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
   let candidate = normalize(join(root, relative));
-  if (!candidate.startsWith(root)) candidate = join(root, '404.html');
+  if (!candidate.startsWith(root)) candidate = join(root, 'not-found.html');
   try {
     if ((await stat(candidate)).isDirectory()) candidate = join(candidate, 'index.html');
     const body = await readFile(candidate);
     response.writeHead(200, { 'Content-Type': types[extname(candidate)] ?? 'application/octet-stream', 'Cache-Control': 'no-cache' });
     response.end(body);
   } catch {
-    const body = await readFile(join(root, '404.html'));
+    const body = await readFile(join(root, 'not-found.html'));
     response.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
     response.end(body);
   }

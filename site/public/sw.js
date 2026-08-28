@@ -17,5 +17,5 @@ self.addEventListener('fetch', event => {
       caches.open(CACHE).then(cache => cache.put(event.request, copy));
     }
     return response;
-  }).catch(() => caches.match(new URL(event.request.url).pathname).then(match => match || caches.match('/404.html')))));
+  }).catch(() => caches.match(new URL(event.request.url).pathname).then(match => match || caches.match('/not-found.html')))));
 });

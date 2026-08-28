@@ -27,7 +27,7 @@ const html = await readFile(new URL('index.html', siteRoot), 'utf8');
 assert.doesNotMatch(html, /src="\/blueprint-crossing\.webp"/, 'unfingerprinted hero URLs must not be shipped');
 assert.match(html, /\/assets\/blueprint-crossing-[^"\s]+\.webp/, 'the landing page must reference a fingerprinted hero image');
 
-for (const route of ['demo/index.html', 'privacy/index.html', 'terms/index.html', '404.html']) {
+for (const route of ['demo/index.html', 'privacy/index.html', 'terms/index.html', 'not-found.html']) {
   const page = await readFile(new URL(route, siteRoot), 'utf8');
   assert.match(page, /rel="canonical"/, `${route} must declare its canonical URL`);
   assert.match(page, /property="og:title"/, `${route} must include Open Graph metadata`);
