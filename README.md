@@ -1,35 +1,49 @@
 # Collection Escape Hatch
 
-Collection Escape Hatch is a local, read-only migration verifier for teams moving API work out of Postman. It inventories a Postman Collection v2.1 and compares the structures your team depends on—folders, requests, URLs, methods, bodies, auth, scripts, examples, and variables—against a Bruno or Hoppscotch export before anyone switches clients.
+Compare Postman v2.1 with Bruno or Hoppscotch exports before your team switches clients. The report lists changed requests, folders, variables, auth, scripts, examples, and bodies.
 
-It never sends API requests, uploads files, or prints variable values.
+The CLI runs locally. It does not send API requests, upload files, or print secret values.
 
-## Install
+## Try the bundled sample
 
-Download a release binary for your platform, or build from source:
+After installing, run one command from any directory:
 
 ```sh
+escape-hatch demo
+```
+
+The command copies sample exports into a new temporary directory. It prints the report path and leaves your current directory unchanged.
+
+The browser demo is available at <https://collection-escape-hatch.sociobot.in/demo/>. It starts with the same realistic lossy migration.
+
+## Build from source
+
+There are no release archives yet. Clone the repository before using the path-based Cargo install:
+
+```sh
+git clone https://github.com/B-Divyesh/sf-collection-escape-hatch.git
+cd sf-collection-escape-hatch
 cargo install --path .
 escape-hatch --help
 ```
 
-Version 0.1.1 supports Postman Collection v2.1 sources and Bruno `.bru` directories, Bruno JSON collections, or Hoppscotch JSON exports as targets.
+Version 0.1.2 accepts Postman Collection v2.1 sources. Targets may be Bruno directories, Bruno JSON files, or Hoppscotch JSON exports.
 
-## Usage
+## Compare exports
 
-Compare a collection and write a Markdown report:
+Write a Markdown report:
 
 ```sh
-escape-hatch verify \
+escape-hatch compare \
   --source fixtures/postman-complete.json \
   --target fixtures/hoppscotch-lossy.json \
   --output migration-report.md
 ```
 
-Include environments and produce deterministic JSON for CI:
+Include environment exports and write JSON for CI:
 
 ```sh
-escape-hatch verify \
+escape-hatch compare \
   --source collection.json \
   --target bruno-collection/ \
   --source-environment postman-environment.json \
@@ -39,50 +53,64 @@ escape-hatch verify \
   --output migration-report.json
 ```
 
-`--json` is shorthand for `--format json`. Omit `--output` to print the report to stdout. Variable values are never included in either format; the report records variable names and whether a value is populated or marked secret.
+`--json` means `--format json`. Omit `--output` to print the report.
 
-Exit codes:
+`--fail-on` controls when CI receives exit code 1. Choose `error`, `warning`, or `never`.
 
-| Code | Meaning |
+| Exit code | Meaning |
 | ---: | --- |
-| 0 | Verification completed and did not meet the chosen failure threshold |
-| 1 | Verification completed and findings met `--fail-on` (`error` by default) |
-| 2 | Usage, format detection, or file-reading error |
+| 0 | The comparison finished below the chosen limit |
+| 1 | Findings reached the chosen limit |
+| 2 | The command, file, or format was invalid |
 
-The verifier compares structure; it deliberately does not execute requests or claim behavioral equivalence. Review warnings where target formats model features differently.
+The CLI compares exported structure. It does not run requests or scripts, and it cannot prove matching client behavior.
 
-## Development
+## Report reference
 
-Requirements: stable Rust and Node.js 20+.
+Each finding includes a stable code, severity, category, artifact path, and redacted evidence. The same input produces the same report order.
+
+JSON reports use schema identifier `escape-hatch.report/v1`. They include formats, inventory counts, findings, and a verdict.
+
+## Privacy and redaction
+
+The CLI and browser demo run on your device. They have no accounts, telemetry, analytics, cloud sync, or request execution.
+
+Reports omit headers and variable values. They replace credentials before the host name with `[credentials-redacted]`.
+
+Sensitive query matching ignores case. Hyphens and periods match underscores.
+
+The exact sensitive names are `token`, `access_token`, `id_token`, `refresh_token`, `api_key`, `apikey`, `key`, and `secret`. They also include `client_secret`, `signature`, `sig`, `authorization`, `credential`, `password`, `session`, and `jwt`.
+
+Reports retain parameter names and safe URL structure.
+
+## Develop, test, and deploy
+
+Requirements are stable Rust and Node.js 20 or newer.
 
 ```sh
-npm install
+npm ci
 npm test
 npm run build
 ```
 
-`npm test` runs Rust unit/integration tests and site tests. `npm run build` produces the release binary in `dist/bin/` and the deployable static site at `dist/site/`. The exact factory deploy directory is `dist/site`.
+`npm test` runs Rust tests and browser tests. It also runs every tagged claim test in `.factory/claims.json`.
 
-Useful individual commands:
+`npm run build` creates `dist/bin/escape-hatch` and the static site under `dist/site/`.
+
+Useful focused commands:
 
 ```sh
-cargo test
-cargo run -- verify --source fixtures/postman-complete.json --target fixtures/hoppscotch-lossy.json
-npm run dev
-npm run build:site
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+npm run typecheck
+npm run test:claim -- --grep '@claim:offline-reload'
 cargo package --allow-dirty
 ```
 
-## Report model
-
-Every finding has a stable code, severity, category, artifact path, and evidence that contains no input values. JSON output includes schema version `escape-hatch.report/v1`, source/target formats, inventories, findings, and a verdict. Output order is stable so reports can be reviewed in pull requests.
-
-## Privacy and security
-
-All verification happens in-process on your machine. There is no telemetry, network client, cloud sync, or request execution in the CLI or the site demo. Treat generated reports as metadata: they contain request names, paths, methods, sanitized URLs, and variable names, but never variable values or headers. URL authority credentials are replaced with `[credentials-redacted]`; query values for credential-bearing names are replaced with `[redacted]`. The query-name policy is case-insensitive (with `-` and `_` treated alike) and covers `token`, token variants, `api_key`/`apikey`, `key`, `secret`, `signature`/`sig`, `authorization`, `credential`, `password`, `session`, and `jwt`; parameter names and non-sensitive URL structure remain visible for review.
+Deploy the contents of `dist/site/` to a static host. The factory deploys that directory to the live site.
 
 ## License and format notes
 
-MIT licensed. See [LICENSE](LICENSE) and the maintained [format and license notes](docs/formats.md). Postman Collection v2.1 is consumed as an interoperable input format; Postman is a trademark of Postman, Inc. Hoppscotch exports and Bruno `.bru` files are read according to their public schemas/format documentation. This project is independent of those vendors.
+Collection Escape Hatch is free under the MIT License. See [LICENSE](LICENSE) and [format and license notes](docs/formats.md).
 
-Live documentation: https://collection-escape-hatch.sociobot.in
+Postman, Bruno, and Hoppscotch name their respective products and projects. This independent interoperability tool is not endorsed by those vendors.

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#eaf4f1">
+    <meta name="description" content="Try a local Postman-to-Hoppscotch migration comparison with isolated sample data.">
+    <title>Demo — Collection Escape Hatch</title>
+    <link rel="canonical" href="https://collection-escape-hatch.sociobot.in/demo/">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Collection Escape Hatch">
+    <meta property="og:title" content="Demo — Collection Escape Hatch">
+    <meta property="og:description" content="Try a local Postman-to-Hoppscotch migration comparison with isolated sample data.">
+    <meta property="og:url" content="https://collection-escape-hatch.sociobot.in/demo/">
+    <meta property="og:image" content="https://collection-escape-hatch.sociobot.in/og-blueprint.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Demo — Collection Escape Hatch">
+    <meta name="twitter:description" content="Try a local migration comparison with isolated sample data.">
+    <meta name="twitter:image" content="https://collection-escape-hatch.sociobot.in/og-blueprint.png">
+  </head>
+  <body class="demo-mode">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <p id="route-announcer" class="sr-only" aria-live="polite"></p>
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label="Collection Escape Hatch home"><span class="mark" aria-hidden="true"><i></i><i></i></span><span>Collection<br>Escape Hatch</span></a>
+      <nav aria-label="Primary navigation"><a href="/#method">How it works</a><a aria-current="page" href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a class="nav-source" href="https://github.com/B-Divyesh/sf-collection-escape-hatch">Source <span aria-hidden="true">↗</span><span class="sr-only"> (opens external site)</span></a></nav>
+      <span id="network-state" class="network-state" aria-live="polite">Online · local processing</span>
+    </header>
+    <aside id="demo-banner" class="demo-banner" aria-label="Demo mode">
+      <strong>Demo — sample data, nothing is saved</strong>
+      <span>Changes stay in a separate in-memory workspace.</span>
+      <button id="reset-demo-banner" type="button">Reset demo</button>
+      <button id="start-real" type="button">Start for real</button>
+    </aside>
+
+    <main id="main" class="demo-page sheet-width">
+      <header class="demo-page-heading">
+        <p class="eyebrow"><span>D–01</span> Isolated browser demo</p>
+        <h1 id="demo-title">Compare a sample Postman migration</h1>
+        <p class="lede">The Acme Orders sample already shows what changed in a lossy Hoppscotch import.</p>
+      </header>
+      <section id="demo" class="demo-section" aria-label="Sample comparison">
+        <div class="bench">
+          <div class="bench-controls">
+            <div class="file-field"><label for="source-file"><span>01 / Source</span> Postman v2.1 JSON</label><input id="source-file" type="file" accept="application/json,.json"><small id="source-name">acme-orders.postman.json · bundled sample</small></div>
+            <div class="flow-arrow" aria-hidden="true">→</div>
+            <div class="file-field"><label for="target-file"><span>02 / Target</span> Hoppscotch JSON</label><input id="target-file" type="file" accept="application/json,.json"><small id="target-name">acme-orders-lossy.hoppscotch.json · bundled sample</small></div>
+            <div class="bench-actions"><button id="run-demo" type="button" class="button primary">Compare exports</button><button id="clear-demo" type="button" class="button secondary">Reset demo</button></div>
+            <p class="privacy-note"><span aria-hidden="true">⌁</span> Sample changes stay in this in-memory demo workspace.</p>
+          </div>
+          <div class="report-panel" aria-labelledby="report-title">
+            <div class="report-topline"><div><span class="coordinate">REPORT / SAMPLE</span><h2 id="report-title">Comparison report</h2></div><span id="report-verdict" class="verdict loading">Comparing</span></div>
+            <div id="report-output" class="empty-report" aria-live="polite" aria-busy="true"><span class="empty-mark" aria-hidden="true">⌁</span><p><strong>Comparing structure…</strong><br>Reading the bundled sample on this device.</p></div>
+          </div>
+        </div>
+      </section>
+      <section class="demo-cli-callout" aria-labelledby="cli-demo-title">
+        <div><p class="eyebrow"><span>D–02</span> CLI sample</p><h2 id="cli-demo-title">Run the bundled demo in one command</h2><p>The CLI writes its report inside a new temporary directory. It leaves your current directory unchanged.</p></div>
+        <div class="command-strip"><code>escape-hatch demo</code><button type="button" class="copy-button" data-copy="escape-hatch demo">Copy demo command</button></div>
+      </section>
+    </main>
+
+    <footer><div class="sheet-width footer-grid"><a class="wordmark footer-mark" href="/" aria-label="Collection Escape Hatch home"><span class="mark" aria-hidden="true"><i></i><i></i></span><span>Collection<br>Escape Hatch</span></a><p>Compare Postman migrations before your team switches clients.<br>Built by Param Factory · v0.1.2 · polish 1</p><nav aria-label="Footer navigation"><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-collection-escape-hatch">GitHub<span class="sr-only"> (opens external site)</span></a></nav></div></footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-const CACHE = 'escape-hatch-v1';
+const CACHE = 'escape-hatch-v2';
 const PRECACHE = /* __PRECACHE__ */ [];
 
 self.addEventListener('install', event => {
@@ -17,5 +17,5 @@ self.addEventListener('fetch', event => {
       caches.open(CACHE).then(cache => cache.put(event.request, copy));
     }
     return response;
-  }).catch(() => caches.match('/index.html'))));
+  }).catch(() => caches.match(new URL(event.request.url).pathname).then(match => match || caches.match('/404.html')))));
 });

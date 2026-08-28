@@ -1,43 +1,97 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test('landing page is accessible and demo catches loss', async ({ page }) => {
+test('one click opens the isolated demo with a finished report', async ({ page }) => {
   const errors: string[] = [];
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await expect(page).toHaveTitle(/Collection Escape Hatch/);
-  await expect(page.locator('h1')).toHaveCount(1);
-  await expect(page.locator('main')).toBeVisible();
-  await page.getByRole('button', { name: 'Load lossy sample' }).click();
-  await expect(page.getByText('Changes detected', { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page).toHaveURL(/\?demo=1$/);
+  await expect(page).toHaveTitle('Demo — Collection Escape Hatch');
+  await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
+  await expect(page.getByText('Changes found', { exact: true })).toBeVisible();
   await expect(page.getByText(/METHOD_CHANGED/)).toBeVisible();
-  const results = await new AxeBuilder({ page }).analyze();
-  expect(results.violations.filter(v => ['serious', 'critical'].includes(v.impact ?? ''))).toEqual([]);
+  await expect(page.locator('#demo-title')).toBeFocused();
   expect(errors).toEqual([]);
 });
 
-test('empty and input error states explain the next action', async ({ page }) => {
+test('direct demo supports reset and start-for-real', async ({ page }) => {
+  await page.goto('/demo/');
+  await expect(page.locator('h1')).toHaveText('Compare a sample Postman migration');
+  await expect(page.getByText('Changes found', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Reset demo' }).first().click();
+  await expect(page.getByText(/METHOD_CHANGED/)).toBeVisible();
+  await page.getByRole('button', { name: 'Start for real' }).click();
+  await expect(page).toHaveURL('/');
+  await expect(page.locator('#demo-banner')).toBeHidden();
+});
+
+test('errors explain recovery and sample remains usable', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('No measurement yet.')).toBeVisible();
-  await page.getByRole('button', { name: 'Run inspection' }).click();
-  await expect(page.getByText('Inspection stopped.')).toBeVisible();
+  await page.getByRole('button', { name: 'Compare exports' }).click();
+  await expect(page.getByText('Comparison stopped.')).toBeVisible();
   await expect(page.getByText(/Choose both/)).toBeVisible();
+  await page.getByRole('button', { name: 'Try it with sample data' }).last().click();
+  await expect(page.getByText('Changes found', { exact: true })).toBeVisible();
 });
 
-test('keyboard path reaches primary controls', async ({ page }) => {
-  await page.goto('/');
-  await page.keyboard.press('Tab');
-  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
-  await page.getByRole('button', { name: 'Load lossy sample' }).focus();
-  await page.keyboard.press('Enter');
-  await expect(page.getByText('Changes detected', { exact: true })).toBeVisible();
-});
-
-test('legal pages have semantic shells', async ({ page }) => {
-  for (const path of ['/privacy/', '/terms/']) {
+test('every route has metadata, shared landmarks, and no serious accessibility issue', async ({ page }) => {
+  for (const path of ['/', '/demo/', '/privacy/', '/terms/']) {
     await page.goto(path);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.locator('main')).toBeVisible();
+    await expect(page.locator('header nav a')).toHaveCount(4);
+    await expect(page.getByText(/Built by Param Factory/)).toBeVisible();
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+    await expect(page.locator('meta[property="og:title"]')).toHaveCount(1);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveCount(1);
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations.filter(v => ['serious', 'critical'].includes(v.impact ?? ''))).toEqual([]);
   }
+});
+
+test('unknown routes return the designed 404 response', async ({ page }) => {
+  const response = await page.goto('/definitely-not-a-route');
+  expect(response?.status()).toBe(404);
+  await expect(page).toHaveTitle('Not found — Collection Escape Hatch');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Return to a known route');
+  await expect(page.getByRole('link', { name: 'Return home' })).toBeVisible();
+});
+
+test('hash navigation moves focus and back restores it', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Build from source' }).click();
+  await expect(page.locator('#install h2')).toBeFocused();
+  await expect(page.locator('#route-announcer')).toHaveText('Install one local binary');
+  await page.goBack();
+  await expect(page).toHaveURL('/');
+  await page.goForward();
+  await expect(page.locator('#install h2')).toBeFocused();
+});
+
+test('keyboard focus, reduced motion, and mobile first screen stay usable', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
+  const outline = await page.getByRole('link', { name: 'Skip to content' }).evaluate(node => getComputedStyle(node).outline);
+  expect(outline).toContain('3px');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(await page.evaluate(() => innerWidth));
+  const duration = await page.locator('.button').first().evaluate(node => getComputedStyle(node).transitionDuration);
+  expect(duration).toMatch(/0\.00001s|1e-05s|0s/);
+  if (testInfo.project.name === 'mobile') {
+    await expect(page.locator('.hero-figure')).toBeHidden();
+    for (const fact of ['Runs locally', 'Works offline after first visit', 'Free under MIT']) {
+      const box = await page.getByText(fact, { exact: true }).boundingBox();
+      expect(box && box.y + box.height).toBeLessThanOrEqual(844);
+    }
+  }
+});
+
+test('external links announce that they leave the site', async ({ page }, testInfo) => {
+  await page.goto('/');
+  if (testInfo.project.name === 'desktop') await expect(page.locator('a.nav-source')).toHaveAccessibleName(/Source.*opens external site/);
+  await expect(page.getByRole('link', { name: /GitHub.*opens external site/ })).toBeVisible();
 });

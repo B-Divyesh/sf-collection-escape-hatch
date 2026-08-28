@@ -1,0 +1,1 @@
+Compare Postman migrations with Bruno or Hoppscotch and catch missing requests, auth, scripts, and variables locally.

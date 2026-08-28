@@ -4,190 +4,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#eaf4f1">
-    <meta name="description" content="Verify Postman migrations to Bruno or Hoppscotch locally. Find lost requests, variables, auth, scripts, examples, and changed body sizes before switching clients.">
-    <title>Collection Escape Hatch — verify API client migrations locally</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23075985'/%3E%3Cpath d='M8 17l5 5L24 9' fill='none' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
+    <meta name="description" content="Compare Postman exports with Bruno or Hoppscotch and find missing migration data before your team switches clients.">
+    <title>Collection Escape Hatch — check Postman migrations</title>
+    <link rel="canonical" href="https://collection-escape-hatch.sociobot.in/">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Collection Escape Hatch">
+    <meta property="og:title" content="Check what survived your Postman migration">
+    <meta property="og:description" content="Compare Postman exports with Bruno or Hoppscotch and find missing migration data before your team switches clients.">
+    <meta property="og:url" content="https://collection-escape-hatch.sociobot.in/">
+    <meta property="og:image" content="https://collection-escape-hatch.sociobot.in/og-blueprint.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Check what survived your Postman migration">
+    <meta name="twitter:description" content="Compare Postman exports with Bruno or Hoppscotch before your team switches clients.">
+    <meta name="twitter:image" content="https://collection-escape-hatch.sociobot.in/og-blueprint.png">
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
+    <p id="route-announcer" class="sr-only" aria-live="polite"></p>
     <header class="site-header">
       <a class="wordmark" href="/" aria-label="Collection Escape Hatch home">
-        <span class="mark" aria-hidden="true"><i></i><i></i></span>
-        <span>Collection<br>Escape Hatch</span>
+        <span class="mark" aria-hidden="true"><i></i><i></i></span><span>Collection<br>Escape Hatch</span>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#method">Method</a>
-        <a href="#coverage">Coverage</a>
-        <a href="#demo">Try it</a>
-        <a class="nav-source" href="https://github.com/B-Divyesh/sf-collection-escape-hatch">Source <span aria-hidden="true">↗</span></a>
+        <a href="/#method">How it works</a>
+        <a href="/demo/">Demo</a>
+        <a href="/privacy/">Privacy</a>
+        <a class="nav-source" href="https://github.com/B-Divyesh/sf-collection-escape-hatch">Source <span aria-hidden="true">↗</span><span class="sr-only"> (opens external site)</span></a>
       </nav>
       <span id="network-state" class="network-state" aria-live="polite">Online · local processing</span>
     </header>
 
+    <aside id="demo-banner" class="demo-banner" aria-label="Demo mode" hidden>
+      <strong>Demo — sample data, nothing is saved</strong>
+      <span>Changes stay in a separate in-memory workspace.</span>
+      <button id="reset-demo-banner" type="button">Reset demo</button>
+      <button id="start-real" type="button">Start for real</button>
+    </aside>
+
     <main id="main">
       <section class="hero sheet-width" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow"><span>A–01</span> Migration inspection tool</p>
-          <h1 id="hero-title">Know what survived the import.</h1>
-          <p class="lede">Compare a Postman collection with its Bruno or Hoppscotch export. Get a field-level loss report before your team changes clients.</p>
+          <p class="eyebrow"><span>A–01</span> Local migration comparison</p>
+          <h1 id="hero-title">Check what survived your Postman migration</h1>
+          <p class="lede">For API teams moving to Bruno or Hoppscotch, compare both exports before anyone switches clients.</p>
           <div class="hero-actions">
-            <a class="button primary" href="#install"><span aria-hidden="true">↓</span> Install the CLI</a>
-            <a class="button secondary" href="#demo">Inspect a sample</a>
+            <a class="button primary" href="/?demo=1">Try it with sample data</a>
+            <a class="button secondary" href="#install">Build from source</a>
           </div>
-          <div class="command-strip" aria-label="Install command">
-            <code>cargo install --path .</code>
-            <button type="button" class="copy-button" data-copy="cargo install --path .">Copy</button>
-          </div>
+          <p class="action-note">The sample opens a finished report in one click.</p>
+          <ul class="hero-facts" aria-label="Product facts">
+            <li>Runs locally</li>
+            <li>Works offline after first visit</li>
+            <li>Free under MIT</li>
+          </ul>
         </div>
         <figure class="hero-figure">
           <span class="measure measure-top" aria-hidden="true">STRUCTURE / TOLERANCE 0</span>
-          <img src="/src/assets/blueprint-crossing.webp" srcset="/src/assets/blueprint-crossing-700.webp 700w, /src/assets/blueprint-crossing.webp 1400w" sizes="(max-width: 680px) calc(100vw - 48px), (max-width: 980px) calc(100vw - 84px), 660px" width="1400" height="933" alt="Blueprint drawing of two document stacks passing through an inspection gate and emerging as a checked report" fetchpriority="high">
-          <figcaption><span>FIG. 1</span> Source artifacts pass through a neutral structural inspection. No requests leave the machine.</figcaption>
+          <img src="/src/assets/blueprint-crossing.webp" srcset="/src/assets/blueprint-crossing-700.webp 700w, /src/assets/blueprint-crossing.webp 1400w" sizes="(max-width: 680px) calc(100vw - 48px), (max-width: 980px) calc(100vw - 84px), 660px" width="1400" height="933" alt="Blueprint drawing of API exports passing through a comparison gate and becoming a report" fetchpriority="high">
+          <figcaption><span>FIG. 1</span> Compare exported structure without sending API requests.</figcaption>
         </figure>
       </section>
 
-      <aside class="trust-rail" aria-label="Privacy guarantees">
-        <div><span aria-hidden="true">◎</span><strong>Local only</strong><small>Files stay in process</small></div>
-        <div><span aria-hidden="true">⊘</span><strong>No requests sent</strong><small>Structure, not behavior</small></div>
-        <div><span aria-hidden="true">▧</span><strong>Values redacted</strong><small>Names stay useful</small></div>
-        <div><span aria-hidden="true">◇</span><strong>CI-shaped output</strong><small>Markdown or JSON</small></div>
-      </aside>
-
       <section id="method" class="section sheet-width">
         <header class="section-heading">
-          <p class="eyebrow"><span>B–02</span> Inspection sequence</p>
-          <h2>A migration check you can repeat.</h2>
-          <p>One read-only pass turns “the import looked okay” into a reviewable artifact.</p>
+          <p class="eyebrow"><span>B–02</span> Three steps</p>
+          <h2>Compare a migration the same way every time</h2>
+          <p>One read-only comparison creates a report your team can review.</p>
         </header>
         <ol class="steps">
-          <li>
-            <span class="step-no">01</span>
-            <h3>Point at both sides</h3>
-            <p>Use your original Postman v2.1 export and the Bruno directory or Hoppscotch JSON produced by the import.</p>
-          </li>
-          <li>
-            <span class="step-no">02</span>
-            <h3>Measure the structure</h3>
-            <p>Requests are matched by folder path and name. Critical fields, scripts, examples, variables, and body bytes are compared.</p>
-          </li>
-          <li>
-            <span class="step-no">03</span>
-            <h3>Keep the evidence</h3>
-            <p>Commit the Markdown report for review or gate a migration fixture in CI with stable JSON and explicit exit codes.</p>
-          </li>
+          <li><span class="step-no">01</span><h3>Choose the source and target exports</h3><p>Use the original Postman v2.1 export and the Bruno or Hoppscotch export.</p></li>
+          <li><span class="step-no">02</span><h3>Compare the exported structure</h3><p>Requests match by folder path and name. The CLI compares fields, scripts, examples, variables, and body bytes.</p></li>
+          <li><span class="step-no">03</span><h3>Save the comparison report</h3><p>Review Markdown with your team. Use stable JSON and exit codes to check saved migration examples in CI.</p></li>
         </ol>
       </section>
 
       <section id="coverage" class="section coverage-section">
         <div class="sheet-width coverage-grid">
           <header class="section-heading compact">
-            <p class="eyebrow"><span>C–03</span> Field schedule</p>
-            <h2>Checks what teams actually lose.</h2>
-            <p>Every finding carries a stable code, severity, artifact path, and redacted evidence.</p>
+            <p class="eyebrow"><span>C–03</span> Compared fields</p>
+            <h2>Find missing migration data</h2>
+            <p>Each finding includes a stable code, severity, category, artifact path, and redacted evidence.</p>
           </header>
-          <div class="schedule" role="table" aria-label="Migration coverage">
-            <div role="row" class="schedule-head"><span role="columnheader">Artifact</span><span role="columnheader">Measurement</span><span role="columnheader">Loss level</span></div>
-            <div role="row"><strong role="cell">Requests</strong><span role="cell">Path · method · URL</span><span role="cell" class="stamp critical">Critical</span></div>
-            <div role="row"><strong role="cell">Bodies</strong><span role="cell">Mode · serialized bytes</span><span role="cell" class="stamp critical">Critical</span></div>
-            <div role="row"><strong role="cell">Auth</strong><span role="cell">Effective type · inheritance</span><span role="cell" class="stamp critical">Critical</span></div>
-            <div role="row"><strong role="cell">Scripts</strong><span role="cell">Event · scope · line count</span><span role="cell" class="stamp critical">Critical</span></div>
-            <div role="row"><strong role="cell">Examples</strong><span role="cell">Name · status · body bytes</span><span role="cell" class="stamp critical">Critical</span></div>
+          <div class="schedule" role="table" aria-label="Fields the CLI compares">
+            <div role="row" class="schedule-head"><span role="columnheader">Artifact</span><span role="columnheader">Compared data</span><span role="columnheader">Result level</span></div>
+            <div role="row"><strong role="cell">Requests</strong><span role="cell">Folder path · name · method · URL</span><span role="cell" class="stamp critical">Error</span></div>
+            <div role="row"><strong role="cell">Bodies</strong><span role="cell">Mode · serialized bytes</span><span role="cell" class="stamp critical">Error</span></div>
+            <div role="row"><strong role="cell">Auth</strong><span role="cell">Effective type · inheritance</span><span role="cell" class="stamp critical">Error</span></div>
+            <div role="row"><strong role="cell">Scripts</strong><span role="cell">Event · scope · line count</span><span role="cell" class="stamp critical">Error</span></div>
+            <div role="row"><strong role="cell">Examples</strong><span role="cell">Name · status · body bytes</span><span role="cell" class="stamp critical">Error</span></div>
             <div role="row"><strong role="cell">Variables</strong><span role="cell">Name · scope · secret state</span><span role="cell" class="stamp redacted">Redacted</span></div>
           </div>
         </div>
       </section>
 
-      <section id="demo" class="section demo-section sheet-width">
+      <section id="demo" class="section demo-section sheet-width" aria-labelledby="demo-title">
         <header class="section-heading">
-          <p class="eyebrow"><span>D–04</span> Local inspection bench</p>
-          <h2>See a lossy import get caught.</h2>
-          <p>This browser preview reads files in memory and makes no network calls. The CLI performs the full comparison.</p>
+          <p class="eyebrow"><span>D–04</span> Browser demo</p>
+          <h2 id="demo-title">See a lossy migration report</h2>
+          <p>The browser demo compares selected JSON in memory. Use the CLI for Bruno exports and full reports.</p>
         </header>
         <div class="bench">
           <div class="bench-controls">
-            <div class="file-field">
-              <label for="source-file"><span>01 / Source</span> Postman v2.1 JSON</label>
-              <input id="source-file" type="file" accept="application/json,.json">
-              <small id="source-name">No source selected</small>
-            </div>
+            <div class="file-field"><label for="source-file"><span>01 / Source</span> Postman v2.1 JSON</label><input id="source-file" type="file" accept="application/json,.json"><small id="source-name">No source selected</small></div>
             <div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="file-field">
-              <label for="target-file"><span>02 / Target</span> Hoppscotch JSON</label>
-              <input id="target-file" type="file" accept="application/json,.json">
-              <small id="target-name">No target selected</small>
-            </div>
+            <div class="file-field"><label for="target-file"><span>02 / Target</span> Hoppscotch JSON</label><input id="target-file" type="file" accept="application/json,.json"><small id="target-name">No target selected</small></div>
             <div class="bench-actions">
-              <button id="run-demo" type="button" class="button primary">Run inspection</button>
-              <button id="load-sample" type="button" class="button secondary">Load lossy sample</button>
-              <button id="clear-demo" type="button" class="text-button">Clear</button>
+              <button id="run-demo" type="button" class="button primary">Compare exports</button>
+              <button id="load-sample" type="button" class="button secondary">Try it with sample data</button>
+              <button id="clear-demo" type="button" class="text-button">Clear selected exports</button>
             </div>
-            <p class="privacy-note"><span aria-hidden="true">⌁</span> Files never leave this tab. Values are not rendered or stored.</p>
+            <p class="privacy-note"><span aria-hidden="true">⌁</span> Selected files stay in memory and are never stored.</p>
           </div>
           <div class="report-panel" aria-labelledby="report-title">
-            <div class="report-topline">
-              <div><span class="coordinate">REPORT / 001</span><h3 id="report-title">Inspection report</h3></div>
-              <span id="report-verdict" class="verdict neutral">Awaiting input</span>
-            </div>
-            <div id="report-output" class="empty-report" aria-live="polite" aria-busy="false">
-              <span class="empty-mark" aria-hidden="true">⌗</span>
-              <p><strong>No measurement yet.</strong><br>Load the sample or choose two exports to begin.</p>
-            </div>
+            <div class="report-topline"><div><span class="coordinate">REPORT / 001</span><h3 id="report-title">Comparison report</h3></div><span id="report-verdict" class="verdict neutral">Waiting for exports</span></div>
+            <div id="report-output" class="empty-report" aria-live="polite" aria-busy="false"><span class="empty-mark" aria-hidden="true">⌗</span><p><strong>No report yet.</strong><br>Choose both exports or try the sample data.</p></div>
           </div>
         </div>
-
         <div class="recorded-demo" aria-labelledby="recorded-title">
-          <div>
-            <span class="coordinate">RECORDED RUN / 00:07</span>
-            <h3 id="recorded-title">What a CI run looks like</h3>
-          </div>
-          <div id="trace" class="trace" aria-live="polite">
-            <p><span>$</span> escape-hatch verify --source team.json --target imported.json --json</p>
-            <p data-trace hidden><span>✓</span> inventoried 24 requests · 6 folders · 18 variables</p>
-            <p data-trace hidden><span>!</span> AUTH_CHANGED · Billing/Create invoice</p>
-            <p data-trace hidden><span>×</span> 3 errors · 2 warnings · exit 1</p>
-          </div>
-          <button id="replay-trace" class="button secondary" type="button">Play recorded run</button>
+          <div><span class="coordinate">CLI DEMO / 00:02</span><h3 id="recorded-title">Run the same bundled sample locally</h3></div>
+          <div class="trace" aria-live="polite"><p><span>$</span> escape-hatch demo</p><p data-trace hidden><span>✓</span> compared Acme Orders in a temporary directory</p><p data-trace hidden><span>!</span> found method, auth, body, script, and request loss</p><p data-trace hidden><span>→</span> wrote migration-report.md</p></div>
+          <button id="replay-trace" class="button secondary" type="button">Replay CLI comparison</button>
+        </div>
+      </section>
+
+      <section id="limits" class="section limits-section">
+        <div class="sheet-width limits-grid">
+          <header class="section-heading compact"><p class="eyebrow"><span>E–05</span> Clear limits</p><h2>Compare structure, not live behavior</h2></header>
+          <div><p>The CLI does not send requests or run scripts. It cannot prove that both API clients behave the same.</p><p>Reports remove variable values, headers, URL credentials, and sensitive query values before rendering.</p></div>
         </div>
       </section>
 
       <section id="install" class="section install-section">
         <div class="sheet-width install-grid">
-          <header class="section-heading compact">
-            <p class="eyebrow"><span>E–05</span> Put it in the checklist</p>
-            <h2>One binary. No account.</h2>
-            <p>Build locally today; release archives can carry the same binary later.</p>
-          </header>
-          <div class="terminal" aria-label="Command line example">
-            <div class="terminal-bar"><span>migration-check.sh</span><span>read only</span></div>
-            <pre><code><span class="prompt">$</span> cargo install --path .
-
-<span class="prompt">$</span> escape-hatch verify \
-  --source team.postman_collection.json \
-  --target bruno/ \
-  --format markdown \
-  --output migration-report.md
-
-<span class="ok">✓</span> values: [redacted]
-<span class="warn">!</span> wrote migration-report.md</code></pre>
-            <button class="copy-button terminal-copy" type="button" data-copy="escape-hatch verify --source team.postman_collection.json --target bruno/ --output migration-report.md">Copy command</button>
+          <header class="section-heading compact"><p class="eyebrow"><span>F–06</span> Build from source</p><h2>Install one local binary</h2><p>Clone the repository, then install the CLI with Cargo. No account is required.</p></header>
+          <div class="terminal" aria-label="Source installation commands">
+            <div class="terminal-bar"><span>source install</span><span>read only</span></div>
+            <pre><code><span class="prompt">$</span> git clone https://github.com/B-Divyesh/sf-collection-escape-hatch.git
+<span class="prompt">$</span> cd sf-collection-escape-hatch
+<span class="prompt">$</span> cargo install --path .
+<span class="prompt">$</span> escape-hatch demo</code></pre>
+            <button class="copy-button terminal-copy" type="button" data-copy="git clone https://github.com/B-Divyesh/sf-collection-escape-hatch.git && cd sf-collection-escape-hatch && cargo install --path .">Copy install command</button>
           </div>
         </div>
       </section>
 
       <section class="section final-call sheet-width">
         <span class="registration" aria-hidden="true">⌖</span>
-        <p class="eyebrow"><span>F–06</span> Before the team switches</p>
-        <h2>Make the silent loss visible.</h2>
-        <p>Export both sides, run one local command, and review the evidence with the people who own the workflows.</p>
-        <a class="button primary" href="#install">Get the verifier</a>
+        <p class="eyebrow"><span>G–07</span> Before the team switches</p>
+        <h2>Find missing migration data</h2>
+        <p>Compare both exports, save the report, and review each finding with the people who own the API workflows.</p>
+        <a class="button primary" href="#install">Install the CLI</a>
       </section>
     </main>
 
     <footer>
       <div class="sheet-width footer-grid">
-        <div class="wordmark footer-mark"><span class="mark" aria-hidden="true"><i></i><i></i></span><span>Collection<br>Escape Hatch</span></div>
-        <p>Neutral migration evidence for API teams.<br>Open source under MIT. No telemetry.</p>
-        <nav aria-label="Footer navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-collection-escape-hatch">GitHub</a></nav>
+        <a class="wordmark footer-mark" href="/" aria-label="Collection Escape Hatch home"><span class="mark" aria-hidden="true"><i></i><i></i></span><span>Collection<br>Escape Hatch</span></a>
+        <p>Compare Postman migrations before your team switches clients.<br>Built by Param Factory · v0.1.2 · polish 1</p>
+        <nav aria-label="Footer navigation"><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-collection-escape-hatch">GitHub<span class="sr-only"> (opens external site)</span></a></nav>
       </div>
     </footer>
     <script type="module" src="/src/main.ts"></script>

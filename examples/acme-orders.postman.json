@@ -1,0 +1,36 @@
+{
+  "info": {
+    "name": "Acme Orders",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.acme.test" },
+    { "key": "api_token", "value": "sample-only-token", "type": "secret" }
+  ],
+  "item": [
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create order",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/orders" },
+            "auth": { "type": "bearer" },
+            "body": { "mode": "raw", "raw": "{\"sku\":\"A-100\",\"quantity\":2}" }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('created', () => {", "  pm.response.to.have.status(201);", "});"] } }
+          ],
+          "response": [
+            { "name": "Created", "code": 201, "body": "{\"id\":42,\"status\":\"queued\"}" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health", "auth": { "type": "noauth" } }
+    }
+  ]
+}

@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://collection-escape-hatch.sociobot.in/sitemap.xml

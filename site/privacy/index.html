@@ -1,35 +1,23 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#eaf4f1">
-    <meta name="description" content="Privacy policy for Collection Escape Hatch, a local-only API collection migration verifier.">
-    <title>Privacy — Collection Escape Hatch</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#eaf4f1"><meta name="description" content="Learn how Collection Escape Hatch keeps collection files local and removes secret values from reports."><title>Privacy — Collection Escape Hatch</title><link rel="canonical" href="https://collection-escape-hatch.sociobot.in/privacy/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta property="og:type" content="website"><meta property="og:site_name" content="Collection Escape Hatch"><meta property="og:title" content="Privacy — Collection Escape Hatch"><meta property="og:description" content="Learn how collection files stay local and secret values are removed from reports."><meta property="og:url" content="https://collection-escape-hatch.sociobot.in/privacy/"><meta property="og:image" content="https://collection-escape-hatch.sociobot.in/og-blueprint.png"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Privacy — Collection Escape Hatch"><meta name="twitter:description" content="Learn how collection files stay local and secret values are removed from reports."><meta name="twitter:image" content="https://collection-escape-hatch.sociobot.in/og-blueprint.png">
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header">
-      <a class="wordmark" href="/" aria-label="Collection Escape Hatch home"><span class="mark" aria-hidden="true"><i></i><i></i></span><span>Collection<br>Escape Hatch</span></a>
-      <nav aria-label="Legal navigation"><a href="/">Product</a><a href="/terms/">Terms</a></nav>
-    </header>
+    <a class="skip-link" href="#main">Skip to content</a><p id="route-announcer" class="sr-only" aria-live="polite"></p>
+    <header class="site-header"><a class="wordmark" href="/" aria-label="Collection Escape Hatch home"><span class="mark" aria-hidden="true"><i></i><i></i></span><span>Collection<br>Escape Hatch</span></a><nav aria-label="Primary navigation"><a href="/#method">How it works</a><a href="/demo/">Demo</a><a aria-current="page" href="/privacy/">Privacy</a><a class="nav-source" href="https://github.com/B-Divyesh/sf-collection-escape-hatch">Source <span aria-hidden="true">↗</span><span class="sr-only"> (opens external site)</span></a></nav><span class="network-state">Local by design</span></header>
     <main id="main" class="legal-main sheet-width">
-      <p class="eyebrow"><span>P–01</span> Effective 28 August 2026</p>
-      <h1>Private by construction.</h1>
+      <p class="eyebrow"><span>P–01</span> Effective 28 August 2026</p><h1>Understand what stays on your device</h1>
       <article class="legal-sheet">
-        <h2>What the verifier processes</h2>
-        <p>The command-line tool reads collection and environment exports only from paths you provide. The browser demo reads selected JSON files in memory. Neither sends files, request bodies, headers, environment values, or reports to us.</p>
-        <h2>What we collect</h2>
-        <p>Nothing. This v1 ships without analytics, cookies, accounts, telemetry, crash reporting, or server-side storage. The static site may be served with ordinary short-lived infrastructure access logs controlled by the hosting platform.</p>
-        <h2>Redaction boundary</h2>
-        <p>Reports retain artifact paths, sanitized request URLs, method names, variable names, scopes, and structural metadata. Variable values are represented as <code>[redacted]</code>. URLs containing inline credentials are replaced with <code>[credentials-redacted]</code>; values for credential-bearing query names such as <code>token</code>, <code>api_key</code>, <code>secret</code>, <code>signature</code>, and <code>authorization</code> are replaced with <code>[redacted]</code>. Parameter names and non-sensitive URL structure stay visible for review.</p>
-        <h2>Offline cache</h2>
-        <p>The site uses a service worker to cache its public application shell on your device. It never caches files you select in the demo. Clear the site data in your browser to remove that public cache.</p>
-        <h2>Questions</h2>
-        <p>Open an issue in the project repository for privacy questions or suspected redaction gaps. Do not attach a real collection or secret to a public issue.</p>
+        <h2>Files stay local</h2><p>The CLI reads only the file paths you provide. The browser demo keeps selected JSON in memory.</p><p>Neither tool uploads files, sends API requests, or sends reports to us.</p>
+        <h2>We collect no product data</h2><p>This version has no analytics, cookies, accounts, telemetry, crash reports, or server-side storage.</p><p>The static host may keep short-lived infrastructure access logs.</p>
+        <h2>Reports remove secret values</h2><p>Reports keep names, paths, methods, scopes, and other structural details. They never include variable values or headers.</p><p>Reports replace URL credentials and sensitive query values with redaction markers.</p>
+        <h2>The public shell works offline</h2><p>A service worker caches the public site after your first visit. It never caches files selected in the browser demo.</p><p>Clear this site's browser data to remove the public cache.</p>
+        <h2>Report a privacy problem</h2><p>Open an issue in the <a href="https://github.com/B-Divyesh/sf-collection-escape-hatch/issues">project repository<span class="sr-only"> (opens external site)</span></a>. Never attach a real collection or secret.</p>
       </article>
     </main>
-    <footer><div class="sheet-width footer-grid"><a class="wordmark" href="/">Collection Escape Hatch</a><p>Local migration evidence. No telemetry.</p><nav aria-label="Footer navigation"><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-collection-escape-hatch">GitHub</a></nav></div></footer>
+    <footer><div class="sheet-width footer-grid"><a class="wordmark footer-mark" href="/" aria-label="Collection Escape Hatch home"><span class="mark" aria-hidden="true"><i></i><i></i></span><span>Collection<br>Escape Hatch</span></a><p>Compare Postman migrations before your team switches clients.<br>Built by Param Factory · v0.1.2 · polish 1</p><nav aria-label="Footer navigation"><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-collection-escape-hatch">GitHub<span class="sr-only"> (opens external site)</span></a></nav></div></footer>
     <script type="module" src="/src/legal.ts"></script>
   </body>
 </html>

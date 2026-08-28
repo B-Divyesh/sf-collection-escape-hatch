@@ -1,0 +1,25 @@
+{
+  "v": 8,
+  "name": "Acme Orders imported",
+  "variables": [
+    { "key": "baseUrl", "value": "https://api.acme.test" }
+  ],
+  "folders": [
+    {
+      "name": "Orders",
+      "folders": [],
+      "requests": [
+        {
+          "name": "Create order",
+          "method": "PUT",
+          "endpoint": "{{baseUrl}}/orders",
+          "auth": { "authType": "none" },
+          "body": { "contentType": "none", "body": "" },
+          "testScript": "",
+          "responses": []
+        }
+      ]
+    }
+  ],
+  "requests": []
+}

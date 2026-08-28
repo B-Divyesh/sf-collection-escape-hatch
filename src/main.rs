@@ -3,7 +3,8 @@ use collection_escape_hatch::{
     FailOn, Format, TargetFormat, compare, load_environment, load_source, load_target, render_json,
     render_markdown,
 };
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Prove an API collection survived its move—without sending a request.
 #[derive(Parser, Debug)]
@@ -16,8 +17,8 @@ struct Cli {
 #[derive(Subcommand, Debug)]
 enum Commands {
     /// Compare a Postman v2.1 collection with a Bruno or Hoppscotch export
-    #[command(alias = "compare")]
-    Verify {
+    #[command(name = "compare", visible_alias = "verify")]
+    Compare {
         /// Postman Collection v2.1 JSON export
         #[arg(short, long, value_name = "FILE")]
         source: PathBuf,
@@ -46,36 +47,41 @@ enum Commands {
         #[arg(long, default_value = "error")]
         fail_on: FailOn,
     },
+    /// Run a bundled, lossy comparison in an isolated temporary directory
+    Demo,
 }
 
 fn main() {
     let cli = Cli::parse();
-    let Some(Commands::Verify {
-        source,
-        target,
-        target_format,
-        source_environment,
-        target_environment,
-        format,
-        json,
-        output,
-        fail_on,
-    }) = cli.command
-    else {
-        Cli::command().print_help().expect("help should render");
-        println!();
-        return;
+    let result = match cli.command {
+        Some(Commands::Compare {
+            source,
+            target,
+            target_format,
+            source_environment,
+            target_environment,
+            format,
+            json,
+            output,
+            fail_on,
+        }) => run(RunOptions {
+            source,
+            target,
+            target_format,
+            source_environment,
+            target_environment,
+            format: if json { Format::Json } else { format },
+            output,
+            fail_on,
+        }),
+        Some(Commands::Demo) => run_demo(),
+        None => {
+            Cli::command().print_help().expect("help should render");
+            println!();
+            return;
+        }
     };
-    match run(RunOptions {
-        source,
-        target,
-        target_format,
-        source_environment,
-        target_environment,
-        format: if json { Format::Json } else { format },
-        output,
-        fail_on,
-    }) {
+    match result {
         Ok(failed) => {
             if failed {
                 std::process::exit(1)
@@ -86,6 +92,50 @@ fn main() {
             std::process::exit(2);
         }
     }
+}
+
+fn run_demo() -> Result<bool, String> {
+    let stamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|e| format!("cannot create demo identifier: {e}"))?
+        .as_nanos();
+    let directory = std::env::temp_dir().join(format!(
+        "collection-escape-hatch-demo-{}-{stamp}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&directory)
+        .map_err(|e| format!("cannot create demo directory {}: {e}", directory.display()))?;
+    let source = directory.join("acme-orders.postman.json");
+    let target = directory.join("acme-orders.hoppscotch.json");
+    let report_path = directory.join("migration-report.md");
+    write_demo_file(
+        &source,
+        include_str!("../examples/acme-orders.postman.json"),
+    )?;
+    write_demo_file(
+        &target,
+        include_str!("../examples/acme-orders-lossy.hoppscotch.json"),
+    )?;
+
+    let source_inventory = load_source(&source)?;
+    let target_inventory = load_target(&target, TargetFormat::Hoppscotch)?;
+    let report = compare(&source_inventory, &target_inventory);
+    std::fs::write(&report_path, render_markdown(&report))
+        .map_err(|e| format!("cannot write {}: {e}", report_path.display()))?;
+
+    println!("Demo — bundled sample data");
+    println!("Compared Acme Orders: Postman v2.1 → Hoppscotch");
+    println!(
+        "Found {} errors and {} warnings, including a changed method, auth, body, script, and missing request.",
+        report.summary.errors, report.summary.warnings
+    );
+    println!("Report: {}", report_path.display());
+    println!("Your working directory was not changed.");
+    Ok(false)
+}
+
+fn write_demo_file(path: &Path, contents: &str) -> Result<(), String> {
+    std::fs::write(path, contents).map_err(|e| format!("cannot write {}: {e}", path.display()))
 }
 
 struct RunOptions {

@@ -1,8 +1,8 @@
 [package]
 name = "collection-escape-hatch"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
-description = "Local, secret-safe verifier for Postman migrations to Bruno or Hoppscotch"
+description = "Compare Postman migrations to Bruno or Hoppscotch without sending requests"
 license = "MIT"
 repository = "https://github.com/B-Divyesh/sf-collection-escape-hatch"
 readme = "README.md"

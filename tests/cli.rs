@@ -1,4 +1,5 @@
 use std::process::Command;
+use std::{fs, time::SystemTime};
 
 fn cli() -> Command {
     Command::new(env!("CARGO_BIN_EXE_escape-hatch"))
@@ -121,4 +122,42 @@ fn changed_url_query_secrets_are_redacted_in_json_and_markdown() {
             assert!(!report.contains(secret), "report leaked {secret}");
         }
     }
+}
+
+#[test]
+fn bundled_demo_uses_a_temp_directory_and_leaves_caller_untouched() {
+    let caller = std::env::temp_dir().join(format!(
+        "escape-hatch-caller-{:?}",
+        SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    fs::create_dir_all(&caller).unwrap();
+    fs::write(caller.join("keep.txt"), "untouched").unwrap();
+
+    let output = cli().arg("demo").current_dir(&caller).output().unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("Demo — bundled sample data"));
+    assert!(stdout.contains("Your working directory was not changed."));
+    let report = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("Report: "))
+        .expect("demo prints its report path");
+    let report_path = std::path::Path::new(report);
+    assert!(report_path.starts_with(std::env::temp_dir()));
+    assert!(!report_path.starts_with(&caller));
+    let report_text = fs::read_to_string(report_path).unwrap();
+    assert!(report_text.contains("METHOD_CHANGED"));
+    assert!(report_text.contains("AUTH_CHANGED"));
+    assert_eq!(
+        fs::read_to_string(caller.join("keep.txt")).unwrap(),
+        "untouched"
+    );
+    assert_eq!(fs::read_dir(&caller).unwrap().count(), 1);
 }
