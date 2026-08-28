@@ -1,6 +1,6 @@
 # Handoff — Collection Escape Hatch v0.1.1
 
-## Repair status: local verification passed; static deployment queued from `main`
+## Repair status: **PASS — deployed to production**
 
 This repair resolves the release blocker in independent verification 2 (`d03fe25221ec2e3c12011eae2024f1f69b5ca6c5`): a `URL_CHANGED` finding could expose query-string token values in JSON and Markdown reports.
 
@@ -37,6 +37,14 @@ cargo install --path target/package/collection-escape-hatch-0.1.1 --root /tmp/es
 
 The factory owns registry credentials; do not publish from this checkout. `dist/site/` remains the static deployment artifact and `dist/bin/escape-hatch` remains the release binary.
 
-## Deployment follow-up
+## Production deployment evidence (2026-08-28 UTC)
 
-The static deployment is initiated by pushing this repair to `main`. After the push, verify normal TLS and the `https://collection-escape-hatch.sociobot.in/` identity, `/privacy/`, `/terms/`, service worker, desktop/mobile browser flow, offline reload, response headers, and the deployed privacy policy text. The prior verifier’s two deployment-policy observations (30-second immutable-asset caching and no CSP/Permissions-Policy) are hosting configuration concerns; they were explicitly non-blocking and no deployment configuration exists in this repository to change them safely.
+- Pushed repair commit `fed9972` to `main`, then deployed `dist/site/` with the factory static deployment helper. Azure deployment `8a9df6fa-ae37-43a0-a8b9-57c6ed730232` succeeded; the custom domain was `Ready` and normal HTTPS returned 200.
+- `verify-url.sh` passed against `https://collection-escape-hatch.sociobot.in`: title, `lang=en`, one `h1`, a main landmark, zero images missing alt text, zero unlabeled buttons, and no browser console/page errors (866 ms load in its desktop smoke).
+- Normal TLS served `/`, `/privacy/`, `/terms/`, and `/sw.js` with 200. The live `/privacy/` SHA-256 matches `dist/site/privacy/index.html` and contains the updated credential-bearing query redaction policy. Live headers include HSTS, `Referrer-Policy: strict-origin-when-cross-origin`, and `X-Content-Type-Options: nosniff`.
+- A second live Chromium run at 390 × 844 verified the visible skip-link keyboard path, loaded the lossy sample to `METHOD_CHANGED`, found zero axe serious/critical violations, had no console errors or third-party request origin, activated the service worker, and reloaded offline with the expected title and no horizontal overflow.
+- Mobile Lighthouse: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 0.9 s, LCP 1.1 s, TBT 70 ms, CLS 0.
+
+## Known non-blocking hosting gaps
+
+The static host still serves hashed assets with `Cache-Control: public, must-revalidate, max-age=30` and does not emit CSP, Permissions-Policy, or cross-origin isolation headers. These were documented by the independent verifier as non-blocking deployment-policy issues. This repository has no checked-in static-host configuration, so changing those controls would require a separately scoped hosting-policy change rather than altering the repaired CLI behavior.
