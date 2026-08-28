@@ -7,7 +7,7 @@
     "dev": "vite --config site/vite.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "npm run typecheck && cargo test && npm run test:site",
-    "test:site": "npm run build:site && playwright test",
+    "test:site": "npm run build:site && node site/tests/deployment-config.test.mjs && playwright test",
     "build": "npm run build:site && npm run build:cli",
     "build:site": "vite build --config site/vite.config.ts && node scripts/build-sw.mjs",
     "build:cli": "cargo build --release && node scripts/copy-binary.mjs"
