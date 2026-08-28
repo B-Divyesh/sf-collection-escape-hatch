@@ -1,4 +1,4 @@
-# Copy audit — polish 1
+# Copy audit — polish 2
 
 Method: whitespace-delimited words. Hyphenated terms and inline code count as one word. Navigation, table cells, status labels, and code are interface fragments.
 
@@ -64,7 +64,15 @@ Headings and actions were also read out of context. They consistently use **comp
 
 ## README
 
-All prose sentences were counted after removing code blocks, headings, and table fragments. The longest contains 14 words. There is no banned marketing term or unsupported release-download claim.
+| Words | Sentence |
+| ---: | --- |
+| 9 | The browser demo is available at the linked demo URL. |
+| 10 | It opens a realistic lossy migration in one click. |
+| 9 | Requirements are stable Rust and Node.js ^20.19.0 or >=22.12.0. |
+| 8 | `npm test` runs Rust tests and browser tests. |
+| 12 | `npm run build` creates `dist/bin/escape-hatch` and the static site under `dist/site/`. |
+
+All other README prose sentences remain at or below 19 words. The release-availability sentence and the untestable test-suite-coverage sentence are removed. There is no banned marketing term.
 
 ## Terminology
 

@@ -132,7 +132,11 @@ function enterDemo(updateUrl: boolean) {
 }
 
 function focusDemo() {
-  document.getElementById('demo')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  const mobile = matchMedia('(max-width: 680px)').matches;
+  const destination = mobile
+    ? document.querySelector<HTMLElement>('.report-panel')
+    : document.getElementById('demo');
+  destination?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   focusPageHeading('demo-title', 'Browser demo loaded');
 }
 

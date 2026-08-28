@@ -18,7 +18,7 @@ The browser demo is available at <https://collection-escape-hatch.sociobot.in/de
 
 ## Build from source
 
-There are no release archives yet. Clone the repository before using the path-based Cargo install:
+Clone the repository before using the path-based Cargo install:
 
 ```sh
 git clone https://github.com/B-Divyesh/sf-collection-escape-hatch.git
@@ -85,7 +85,7 @@ Reports retain parameter names and safe URL structure.
 
 ## Develop, test, and deploy
 
-Requirements are stable Rust and Node.js 20 or newer.
+Requirements are stable Rust and Node.js ^20.19.0 or >=22.12.0.
 
 ```sh
 npm ci
@@ -93,7 +93,7 @@ npm test
 npm run build
 ```
 
-`npm test` runs Rust tests and browser tests. It also runs every tagged claim test in `.factory/claims.json`.
+`npm test` runs Rust tests and browser tests.
 
 `npm run build` creates `dist/bin/escape-hatch` and the static site under `dist/site/`.
 

@@ -18,6 +18,7 @@ function run(args: string[]) {
 }
 
 test('@claim:one-click-demo opens a finished isolated browser report', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
   await expect(page).toHaveURL(/\?demo=1$/);
@@ -27,6 +28,8 @@ test('@claim:one-click-demo opens a finished isolated browser report', async ({ 
   await expect(page.getByText('METHOD_CHANGED')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Reset demo' }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: 'Start for real' })).toBeVisible();
+  await expect(page.locator('#report-output .report-summary')).toBeInViewport();
+  await expect(page.getByText('METHOD_CHANGED')).toBeInViewport();
 });
 
 test('@claim:isolated-cli-demo writes only to a new temporary workspace', async () => {
@@ -258,6 +261,10 @@ test('@claim:build-contract creates the documented release outputs', async () =>
   expect((await readdir(resolve('dist/bin')))).toContain('escape-hatch');
   expect((await readdir(resolve('dist/site')))).toContain('index.html');
   expect((await readdir(resolve('dist/site')))).toContain('demo');
+  const readme = await readFile(resolve('README.md'), 'utf8');
+  const vite = JSON.parse(await readFile(resolve('node_modules/vite/package.json'), 'utf8'));
+  expect(readme).toContain('Node.js ^20.19.0 or >=22.12.0');
+  expect(vite.engines.node).toBe('^20.19.0 || >=22.12.0');
 });
 
 test('@claim:mit-license includes the MIT grant', async () => {

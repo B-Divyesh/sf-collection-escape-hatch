@@ -78,7 +78,7 @@
   },
   {
     "id": "build-contract",
-    "claim": "The documented build creates dist/bin/escape-hatch and dist/site",
+    "claim": "The documented Node requirement matches the pinned Vite build, which creates dist/bin/escape-hatch and dist/site",
     "where": "README development section",
     "test": "npm run test:claim -- --grep '@claim:build-contract'",
     "sandbox": "fresh build performed by the claim script"

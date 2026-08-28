@@ -19,6 +19,17 @@ test('one click opens the isolated demo with a finished report', async ({ page }
   expect(errors).toEqual([]);
 });
 
+test('mobile demo opens with its completed report ahead of file controls', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page.locator('#report-output .report-summary')).toBeInViewport();
+  await expect(page.getByText('METHOD_CHANGED')).toBeInViewport();
+  const report = await page.locator('.report-panel').boundingBox();
+  const controls = await page.locator('.bench-controls').boundingBox();
+  expect(report && controls && report.y).toBeLessThan(controls?.y ?? 0);
+});
+
 test('demo history restores route metadata and focus', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
@@ -133,6 +144,7 @@ test('hash navigation moves focus and back restores it', async ({ page }) => {
 
 test('keyboard focus, reduced motion, and mobile first screen stay usable', async ({ page }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  if (testInfo.project.name === 'desktop') await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
@@ -150,6 +162,15 @@ test('keyboard focus, reduced motion, and mobile first screen stay usable', asyn
     for (const fact of ['Runs locally', 'Works offline after first visit', 'Free under MIT']) {
       const box = await page.getByText(fact, { exact: true }).boundingBox();
       expect(box && box.y + box.height).toBeLessThanOrEqual(844);
+    }
+  } else {
+    const action = await page.getByRole('link', { name: 'Try it with sample data' }).boundingBox();
+    const note = await page.locator('.action-note').boundingBox();
+    expect(action && action.y + action.height).toBeLessThanOrEqual(900);
+    expect(note && note.y + note.height).toBeLessThanOrEqual(900);
+    for (const fact of ['Runs locally', 'Works offline after first visit', 'Free under MIT']) {
+      const box = await page.getByText(fact, { exact: true }).boundingBox();
+      expect(box && box.y + box.height).toBeLessThanOrEqual(900);
     }
   }
 });
